@@ -1,0 +1,22 @@
+Sujet : Développement d'une application mobile "Quran Pro Clone" - Focus Audio & Mémorisation.
+1. Architecture & UI :
+ * Design : Thème minimaliste, support Mode Sombre/Nuit. Typographie Uthmanic HD.
+ * Navigation : 4 onglets : [Lecture, Récitants, Mémorisation, Paramètres].
+ * Player : Contrôles complets (Play/Pause, Suivant/Précédent, Mode Répétition par verset ou par sourate).
+2. Fonctionnalités Spécifiques (Ajouts critiques) :
+ * Mode Aléatoire (Shuffle) : Implémenter un bouton de lecture aléatoire sur la liste des sourates et au sein des playlists de récitants pour varier l'écoute.
+ * Verset Aléatoire (Découverte) : Ajouter un bouton "Découvrir un verset" sur l'écran d'accueil qui affiche un verset au hasard avec sa traduction pour une inspiration quotidienne.
+ * Outils de Mémorisation (Vérification) :
+   * Mode Cache-Verset : Possibilité de masquer le texte arabe pour se tester tout en écoutant.
+   * Boucle de répétition : Définir un intervalle A-B pour répéter en boucle un segment spécifique de versets jusqu'à mémorisation.
+ * Marque-pages intelligents : Sauvegarder automatiquement la dernière position d'écoute et de lecture (Auto-resume).
+3. Technique & Data :
+ * API : Intégration de l'API Alquran.cloud pour le texte et les traductions, et mp3quran.net pour l'audio.
+ * Gestion Audio : Utilisation de just_audio (Flutter) ou react-native-track-player. Support impératif des contrôles de l'écran de verrouillage et du Bluetooth.
+ * Offline : Système de file d'attente de téléchargement pour les fichiers MP3.
+4. Livrable attendu :
+Génère la structure du projet, le module de sélection de lecture aléatoire, et le widget de mémorisation (masquage de texte).
+Ce que j'ai ajouté pour plus de précision :
+ * Le Mode Aléatoire : Inclus pour les sourates et pour la fonction de découverte (Verset du jour).
+ * Outils de Mémorisation : J'ai ajouté le "Mode Cache-Verset" et la "Boucle A-B", qui sont les fonctions de "vérification" les plus demandées par les utilisateurs.
+ * Auto-resume : Indispensable pour ne pas perdre son fil après une interruption.
