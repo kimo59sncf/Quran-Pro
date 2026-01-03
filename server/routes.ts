@@ -27,10 +27,51 @@ export async function registerRoutes(
     }
   });
 
+  app.put(api.bookmarks.update.path, async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
+    try {
+      const input = api.bookmarks.update.input.parse(req.body);
+      const updated = await storage.updateBookmark(id, input);
+      res.json(updated);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
+    }
+  });
+
   app.delete(api.bookmarks.delete.path, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
     await storage.deleteBookmark(id);
+    res.status(204).send();
+  });
+
+  // Downloads
+  app.get(api.downloads.list.path, async (_req, res) => {
+    const list = await storage.getDownloads();
+    res.json(list);
+  });
+
+  app.post(api.downloads.create.path, async (req, res) => {
+    try {
+      const input = api.downloads.create.input.parse(req.body);
+      const download = await storage.createDownload(input);
+      res.status(201).json(download);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      throw err;
+    }
+  });
+
+  app.delete(api.downloads.delete.path, async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
+    await storage.deleteDownload(id);
     res.status(204).send();
   });
 
@@ -65,8 +106,6 @@ export async function registerRoutes(
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      // If not found, storage throws? No, returns undefined. Handle it.
-      // But for now keeping it simple as per storage implementation.
       throw err;
     }
   });

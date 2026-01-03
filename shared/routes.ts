@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { insertBookmarkSchema, insertMemorizationSchema, bookmarks, memorizationProgress } from './schema';
+import { insertBookmarkSchema, insertMemorizationSchema, insertDownloadSchema, bookmarks, memorizationProgress, downloads } from './schema';
 
 export const api = {
   bookmarks: {
@@ -22,6 +22,32 @@ export const api = {
     delete: {
       method: 'DELETE' as const,
       path: '/api/bookmarks/:id',
+      responses: {
+        204: z.void(),
+        404: z.object({ message: z.string() }),
+      },
+    },
+  },
+  downloads: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/downloads',
+      responses: {
+        200: z.array(z.custom<typeof downloads.$inferSelect>()),
+      },
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/downloads',
+      input: insertDownloadSchema,
+      responses: {
+        201: z.custom<typeof downloads.$inferSelect>(),
+        400: z.object({ message: z.string() }),
+      },
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/downloads/:id',
       responses: {
         204: z.void(),
         404: z.object({ message: z.string() }),

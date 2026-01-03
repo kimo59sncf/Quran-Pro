@@ -2,10 +2,13 @@ import { db } from "./db";
 import {
   bookmarks,
   memorizationProgress,
+  downloads,
   type InsertBookmark,
   type InsertMemorization,
+  type InsertDownload,
   type Bookmark,
-  type Memorization
+  type Memorization,
+  type Download
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -19,6 +22,11 @@ export interface IStorage {
   getMemorizationProgress(): Promise<Memorization[]>;
   createMemorization(goal: InsertMemorization): Promise<Memorization>;
   updateMemorization(id: number, updates: Partial<InsertMemorization>): Promise<Memorization>;
+
+  // Downloads
+  getDownloads(): Promise<Download[]>;
+  createDownload(download: InsertDownload): Promise<Download>;
+  deleteDownload(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -51,6 +59,19 @@ export class DatabaseStorage implements IStorage {
       .where(eq(memorizationProgress.id, id))
       .returning();
     return updated;
+  }
+
+  async getDownloads(): Promise<Download[]> {
+    return await db.select().from(downloads).orderBy(desc(downloads.createdAt));
+  }
+
+  async createDownload(download: InsertDownload): Promise<Download> {
+    const [newDownload] = await db.insert(downloads).values(download).returning();
+    return newDownload;
+  }
+
+  async deleteDownload(id: number): Promise<void> {
+    await db.delete(downloads).where(eq(downloads.id, id));
   }
 }
 
