@@ -19,6 +19,15 @@ export const api = {
         400: z.object({ message: z.string() }),
       },
     },
+    update: {
+      method: 'PUT' as const,
+      path: '/api/bookmarks/:id',
+      input: insertBookmarkSchema.partial(),
+      responses: {
+        200: z.custom<typeof bookmarks.$inferSelect>(),
+        404: z.object({ message: z.string() }),
+      },
+    },
     delete: {
       method: 'DELETE' as const,
       path: '/api/bookmarks/:id',

@@ -16,17 +16,18 @@ export interface IStorage {
   // Bookmarks
   getBookmarks(): Promise<Bookmark[]>;
   createBookmark(bookmark: InsertBookmark): Promise<Bookmark>;
+  updateBookmark(id: number, updates: Partial<InsertBookmark>): Promise<Bookmark>;
   deleteBookmark(id: number): Promise<void>;
-
-  // Memorization
-  getMemorizationProgress(): Promise<Memorization[]>;
-  createMemorization(goal: InsertMemorization): Promise<Memorization>;
-  updateMemorization(id: number, updates: Partial<InsertMemorization>): Promise<Memorization>;
 
   // Downloads
   getDownloads(): Promise<Download[]>;
   createDownload(download: InsertDownload): Promise<Download>;
   deleteDownload(id: number): Promise<void>;
+
+  // Memorization
+  getMemorizationProgress(): Promise<Memorization[]>;
+  createMemorization(goal: InsertMemorization): Promise<Memorization>;
+  updateMemorization(id: number, updates: Partial<InsertMemorization>): Promise<Memorization>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -39,8 +40,30 @@ export class DatabaseStorage implements IStorage {
     return newBookmark;
   }
 
+  async updateBookmark(id: number, updates: Partial<InsertBookmark>): Promise<Bookmark> {
+    const [updated] = await db
+      .update(bookmarks)
+      .set(updates)
+      .where(eq(bookmarks.id, id))
+      .returning();
+    return updated;
+  }
+
   async deleteBookmark(id: number): Promise<void> {
     await db.delete(bookmarks).where(eq(bookmarks.id, id));
+  }
+
+  async getDownloads(): Promise<Download[]> {
+    return await db.select().from(downloads).orderBy(desc(downloads.createdAt));
+  }
+
+  async createDownload(download: InsertDownload): Promise<Download> {
+    const [newDownload] = await db.insert(downloads).values(download).returning();
+    return newDownload;
+  }
+
+  async deleteDownload(id: number): Promise<void> {
+    await db.delete(downloads).where(eq(downloads.id, id));
   }
 
   async getMemorizationProgress(): Promise<Memorization[]> {
@@ -59,19 +82,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(memorizationProgress.id, id))
       .returning();
     return updated;
-  }
-
-  async getDownloads(): Promise<Download[]> {
-    return await db.select().from(downloads).orderBy(desc(downloads.createdAt));
-  }
-
-  async createDownload(download: InsertDownload): Promise<Download> {
-    const [newDownload] = await db.insert(downloads).values(download).returning();
-    return newDownload;
-  }
-
-  async deleteDownload(id: number): Promise<void> {
-    await db.delete(downloads).where(eq(downloads.id, id));
   }
 }
 
