@@ -16,11 +16,10 @@ export default function Reciters() {
   const { data: bookmarks } = useBookmarks();
   const createBookmark = useCreateBookmark();
   const deleteBookmark = useDeleteBookmark();
-
-  const filteredReciters = reciters?.filter(r => 
-    r.name.toLowerCase().includes(search.toLowerCase()) && 
-    r.moshaf.length > 0
-  );
+  const { setReciter, play, currentReciter } = usePlayerStore();
+  const [search, setSearch] = useState("");
+  const [selectedReciter, setSelectedReciter] = useState<any>(null);
+  const { toast } = useToast();
 
   const handleReciterSelect = (reciter: any) => {
     setSelectedReciter(reciter);
