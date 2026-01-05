@@ -1,20 +1,21 @@
 import { useReciters } from "@/hooks/use-reciters";
 import { usePlayerStore } from "@/hooks/use-player";
 import { useSurahs } from "@/hooks/use-quran";
+import { useBookmarks, useCreateBookmark, useDeleteBookmark } from "@/hooks/use-bookmarks";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function Reciters() {
   const { data: reciters, isLoading: isLoadingReciters } = useReciters();
   const { data: surahs, isLoading: isLoadingSurahs } = useSurahs();
-  const { setReciter, play, currentReciter, serverUrl } = usePlayerStore();
-  const [search, setSearch] = useState("");
-  const [selectedReciter, setSelectedReciter] = useState<any>(null);
-  const { toast } = useToast();
+  const { data: bookmarks } = useBookmarks();
+  const createBookmark = useCreateBookmark();
+  const deleteBookmark = useDeleteBookmark();
 
   const filteredReciters = reciters?.filter(r => 
     r.name.toLowerCase().includes(search.toLowerCase()) && 
@@ -38,11 +39,30 @@ export default function Reciters() {
     });
   };
 
-  const handleAction = (type: string, surahName: string) => {
+  const handleAction = (type: string, surahName: string, id?: number) => {
     toast({
       title: type,
       description: `${surahName} added to ${type.toLowerCase()}`,
     });
+  };
+
+  const isReciterFavorite = (reciterId: number) => {
+    return bookmarks?.some(b => b.type === "reciter" && b.reciterId === String(reciterId) && b.isFavorite);
+  };
+
+  const toggleReciterFavorite = (reciter: any) => {
+    const favorite = bookmarks?.find(b => b.type === "reciter" && b.reciterId === String(reciter.id));
+    if (favorite) {
+      deleteBookmark.mutate(favorite.id);
+    } else {
+      createBookmark.mutate({
+        surahNumber: 0,
+        ayahNumber: 0,
+        type: "reciter",
+        reciterId: String(reciter.id),
+        isFavorite: true,
+      });
+    }
   };
 
   if (selectedReciter) {
@@ -53,10 +73,18 @@ export default function Reciters() {
           <Button variant="ghost" size="icon" onClick={() => setSelectedReciter(null)}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold font-display text-primary truncate">{selectedReciter.name}</h1>
             <p className="text-xs text-muted-foreground">Select a Surah to play</p>
           </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={cn("h-10 w-10", isReciterFavorite(selectedReciter.id) ? "text-red-500" : "text-muted-foreground")}
+            onClick={() => toggleReciterFavorite(selectedReciter)}
+          >
+            <Heart className={cn("w-5 h-5", isReciterFavorite(selectedReciter.id) && "fill-current")} />
+          </Button>
         </div>
 
         <div className="p-4 space-y-4">
@@ -73,18 +101,21 @@ export default function Reciters() {
             {surahs?.map((surah) => (
               <Card key={surah.number} className="bg-card hover:bg-accent/50 transition-colors">
                 <CardContent className="p-3 flex items-center gap-4">
-                  <div 
-                    className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-                    onClick={() => play(surah.number, selectedReciter, server)}
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                  </div>
-                  <div className="flex-1 min-w-0" onClick={() => play(surah.number, selectedReciter, server)}>
-                    <h3 className="font-semibold text-sm truncate">{surah.englishName}</h3>
-                    <p className="text-xs text-muted-foreground">{surah.name}</p>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="text-xs font-mono text-muted-foreground w-6">{surah.number}</span>
+                    <div 
+                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                      onClick={() => play(surah.number, selectedReciter, server)}
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                    </div>
+                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => play(surah.number, selectedReciter, server)}>
+                      <h3 className="font-semibold text-sm truncate">{surah.englishName}</h3>
+                      <p className="text-xs text-muted-foreground">{surah.name}</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" onClick={() => handleAction("Favorites", surah.englishName)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" onClick={() => handleAction("Favorites", surah.englishName, surah.number)}>
                       <Heart className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Playlist", surah.englishName)}>

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { BookOpen, Headphones, Trophy, Settings } from "lucide-react";
+import { BookOpen, Headphones, Trophy, Settings, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
@@ -8,6 +8,7 @@ export function BottomNav() {
   const navItems = [
     { href: "/", icon: BookOpen, label: "Read" },
     { href: "/reciters", icon: Headphones, label: "Listen" },
+    { href: "/favorites", icon: Heart, label: "Cœur" },
     { href: "/memorize", icon: Trophy, label: "Memorize" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];

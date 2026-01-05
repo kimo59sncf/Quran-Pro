@@ -9,6 +9,7 @@ import { AudioPlayer } from "@/components/AudioPlayer";
 import Home from "@/pages/Home";
 import SurahDetail from "@/pages/SurahDetail";
 import Reciters from "@/pages/Reciters";
+import Favorites from "@/pages/Favorites";
 import Memorize from "@/pages/Memorize";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/surah/:id" component={SurahDetail} />
       <Route path="/reciters" component={Reciters} />
+      <Route path="/favorites" component={Favorites} />
       <Route path="/memorize" component={Memorize} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
