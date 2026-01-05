@@ -1,28 +1,107 @@
 import { useReciters } from "@/hooks/use-reciters";
 import { usePlayerStore } from "@/hooks/use-player";
+import { useSurahs } from "@/hooks/use-quran";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Play, Music } from "lucide-react";
+import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Reciters() {
-  const { data: reciters, isLoading } = useReciters();
-  const { setReciter, play, currentReciter } = usePlayerStore();
+  const { data: reciters, isLoading: isLoadingReciters } = useReciters();
+  const { data: surahs, isLoading: isLoadingSurahs } = useSurahs();
+  const { setReciter, play, currentReciter, serverUrl } = usePlayerStore();
   const [search, setSearch] = useState("");
+  const [selectedReciter, setSelectedReciter] = useState<any>(null);
+  const { toast } = useToast();
 
   const filteredReciters = reciters?.filter(r => 
     r.name.toLowerCase().includes(search.toLowerCase()) && 
-    r.moshaf.length > 0 // Filter out reciters with no recordings
+    r.moshaf.length > 0
   );
 
   const handleReciterSelect = (reciter: any) => {
-    // Find the first high quality server
+    setSelectedReciter(reciter);
     const moshaf = reciter.moshaf[0];
-    const server = moshaf.server;
-    
-    // Play Al-Fatiha (1) by default when selecting a reciter
-    play(1, reciter, server);
+    setReciter(reciter);
   };
+
+  const handleShufflePlay = () => {
+    if (!surahs || !selectedReciter) return;
+    const randomSurah = surahs[Math.floor(Math.random() * surahs.length)];
+    const server = selectedReciter.moshaf[0].server;
+    play(randomSurah.number, selectedReciter, server);
+    toast({
+      title: "Shuffle Play",
+      description: `Playing ${randomSurah.englishName}`,
+    });
+  };
+
+  const handleAction = (type: string, surahName: string) => {
+    toast({
+      title: type,
+      description: `${surahName} added to ${type.toLowerCase()}`,
+    });
+  };
+
+  if (selectedReciter) {
+    const server = selectedReciter.moshaf[0].server;
+    return (
+      <div className="min-h-screen bg-background pb-32">
+        <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-lg border-b border-border p-4 flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => setSelectedReciter(null)}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold font-display text-primary truncate">{selectedReciter.name}</h1>
+            <p className="text-xs text-muted-foreground">Select a Surah to play</p>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-4">
+          <Button 
+            className="w-full gap-2 bg-primary/10 text-primary hover:bg-primary/20 border-primary/20" 
+            variant="outline"
+            onClick={handleShufflePlay}
+          >
+            <ShuffleIcon className="w-4 h-4" />
+            Lecteur Aléatoire
+          </Button>
+
+          <div className="space-y-2">
+            {surahs?.map((surah) => (
+              <Card key={surah.number} className="bg-card hover:bg-accent/50 transition-colors">
+                <CardContent className="p-3 flex items-center gap-4">
+                  <div 
+                    className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                    onClick={() => play(surah.number, selectedReciter, server)}
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                  </div>
+                  <div className="flex-1 min-w-0" onClick={() => play(surah.number, selectedReciter, server)}>
+                    <h3 className="font-semibold text-sm truncate">{surah.englishName}</h3>
+                    <p className="text-xs text-muted-foreground">{surah.name}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" onClick={() => handleAction("Favorites", surah.englishName)}>
+                      <Heart className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Playlist", surah.englishName)}>
+                      <ListPlus className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Download", surah.englishName)}>
+                      <CloudDownload className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -40,7 +119,7 @@ export default function Reciters() {
       </div>
 
       <div className="p-4">
-        {isLoading ? (
+        {isLoadingReciters ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
