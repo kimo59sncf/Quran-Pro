@@ -21,6 +21,11 @@ export default function Reciters() {
   const [selectedReciter, setSelectedReciter] = useState<any>(null);
   const { toast } = useToast();
 
+  const filteredReciters = reciters?.filter(r => 
+    r.name.toLowerCase().includes(search.toLowerCase()) && 
+    r.moshaf.length > 0
+  );
+
   const handleReciterSelect = (reciter: any) => {
     setSelectedReciter(reciter);
     const moshaf = reciter.moshaf[0];
