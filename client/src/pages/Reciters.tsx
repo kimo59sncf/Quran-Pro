@@ -43,11 +43,30 @@ export default function Reciters() {
     });
   };
 
-  const handleAction = (type: string, surahName: string, id?: number) => {
-    toast({
-      title: type,
-      description: `${surahName} added to ${type.toLowerCase()}`,
-    });
+  const handleAction = (type: string, surah: any) => {
+    if (type === "Favorites") {
+      const isFav = bookmarks?.some(b => b.type === "surah" && b.surahNumber === surah.number && b.isFavorite);
+      if (isFav) {
+        const fav = bookmarks?.find(b => b.type === "surah" && b.surahNumber === surah.number && b.isFavorite);
+        if (fav) deleteBookmark.mutate(fav.id);
+      } else {
+        createBookmark.mutate({
+          surahNumber: surah.number,
+          ayahNumber: 0,
+          type: "surah",
+          isFavorite: true,
+        });
+      }
+    } else {
+      toast({
+        title: type,
+        description: `${surah.englishName} added to ${type.toLowerCase()}`,
+      });
+    }
+  };
+
+  const isSurahFavorite = (surahNumber: number) => {
+    return bookmarks?.some(b => b.type === "surah" && b.surahNumber === surahNumber && b.isFavorite);
   };
 
   const isReciterFavorite = (reciterId: number) => {
@@ -119,13 +138,18 @@ export default function Reciters() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" onClick={() => handleAction("Favorites", surah.englishName, surah.number)}>
-                      <Heart className="w-4 h-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className={cn("h-8 w-8 hover:text-red-500", isSurahFavorite(surah.number) ? "text-red-500" : "text-muted-foreground")}
+                      onClick={() => handleAction("Favorites", surah)}
+                    >
+                      <Heart className={cn("w-4 h-4", isSurahFavorite(surah.number) && "fill-current")} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Playlist", surah.englishName)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Playlist", surah)}>
                       <ListPlus className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Download", surah.englishName)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Download", surah)}>
                       <CloudDownload className="w-4 h-4" />
                     </Button>
                   </div>
