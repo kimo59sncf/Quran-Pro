@@ -5,10 +5,11 @@ import { useBookmarks, useCreateBookmark, useDeleteBookmark } from "@/hooks/use-
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useSearch } from "wouter";
 
 export default function Reciters() {
   const { data: reciters, isLoading: isLoadingReciters } = useReciters();
@@ -20,6 +21,21 @@ export default function Reciters() {
   const [search, setSearch] = useState("");
   const [selectedReciter, setSelectedReciter] = useState<any>(null);
   const { toast } = useToast();
+  const queryString = useSearch();
+
+  useEffect(() => {
+    if (reciters && queryString) {
+      const params = new URLSearchParams(queryString);
+      const id = params.get('id');
+      if (id) {
+        const reciter = reciters.find(r => String(r.id) === id);
+        if (reciter) {
+          setSelectedReciter(reciter);
+          setReciter(reciter);
+        }
+      }
+    }
+  }, [reciters, queryString, setReciter]);
 
   const filteredReciters = reciters?.filter(r => 
     r.name.toLowerCase().includes(search.toLowerCase()) && 
@@ -55,6 +71,20 @@ export default function Reciters() {
           ayahNumber: 0,
           type: "surah",
           isFavorite: true,
+        });
+      }
+    } else if (type === "Playlist") {
+      const isPlaylist = bookmarks?.some(b => b.type === "playlist" && b.surahNumber === surah.number && b.isFavorite);
+      if (isPlaylist) {
+        const item = bookmarks?.find(b => b.type === "playlist" && b.surahNumber === surah.number);
+        if (item) deleteBookmark.mutate(item.id);
+      } else {
+        createBookmark.mutate({
+          surahNumber: surah.number,
+          ayahNumber: 0,
+          type: "playlist",
+          isFavorite: true,
+          reciterId: String(selectedReciter.id)
         });
       }
     } else {

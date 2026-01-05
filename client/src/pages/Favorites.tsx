@@ -2,16 +2,18 @@ import { useBookmarks } from "@/hooks/use-bookmarks";
 import { useReciters } from "@/hooks/use-reciters";
 import { useSurahs } from "@/hooks/use-quran";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Music, ListMusic, Loader2, Play } from "lucide-react";
+import { Heart, Music, ListMusic, Loader2, Play, ExternalLink } from "lucide-react";
 import { usePlayerStore } from "@/hooks/use-player";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export default function Favorites() {
   const { data: bookmarks, isLoading: isLoadingBookmarks } = useBookmarks();
   const { data: reciters } = useReciters();
   const { data: surahs } = useSurahs();
   const { play } = usePlayerStore();
+  const [, setLocation] = useLocation();
 
   const favoriteReciters = reciters?.filter(r => 
     bookmarks?.some(b => b.type === "reciter" && b.reciterId === String(r.id) && b.isFavorite)
@@ -21,15 +23,24 @@ export default function Favorites() {
     bookmarks?.some(b => b.type === "surah" && b.surahNumber === s.number && b.isFavorite)
   );
 
+  const playlistItems = bookmarks?.filter(b => b.type === "playlist")?.map(item => {
+    const surah = surahs?.find(s => s.number === item.surahNumber);
+    const reciter = reciters?.find(r => String(r.id) === item.reciterId);
+    return { ...item, surah, reciter };
+  });
+
   const isLoading = isLoadingBookmarks;
 
   const handlePlaySurah = (surahNumber: number) => {
-    // We need a reciter to play a surah. 
-    // If there's a favorite reciter, use the first one. Otherwise, we might need a default.
-    // For now, let's find the first favorite reciter or the first available one.
     const reciterToUse = favoriteReciters?.[0] || reciters?.[0];
     if (reciterToUse && reciterToUse.moshaf.length > 0) {
       play(surahNumber, reciterToUse, reciterToUse.moshaf[0].server);
+    }
+  };
+
+  const handlePlayPlaylistItem = (item: any) => {
+    if (item.reciter && item.reciter.moshaf.length > 0) {
+      play(item.surahNumber, item.reciter, item.reciter.moshaf[0].server);
     }
   };
 
@@ -68,7 +79,7 @@ export default function Favorites() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {favoriteReciters?.map((reciter) => (
                     <Card key={reciter.id} className="bg-card">
-                      <CardContent className="p-4 flex items-center gap-4">
+                      <CardContent className="p-4 flex items-center justify-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Music className="w-5 h-5" />
                         </div>
@@ -76,6 +87,14 @@ export default function Favorites() {
                           <h3 className="font-semibold truncate">{reciter.name}</h3>
                           <p className="text-xs text-muted-foreground">{reciter.moshaf.length} Rewaya(s)</p>
                         </div>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="text-primary"
+                          onClick={() => setLocation(`/reciters?id=${reciter.id}`)}
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                        </Button>
                       </CardContent>
                     </Card>
                   ))}
@@ -111,8 +130,32 @@ export default function Favorites() {
               )}
             </TabsContent>
 
-            <TabsContent value="playlists" className="space-y-4">
-              <p className="text-center text-muted-foreground py-12">Vos playlists apparaîtront ici</p>
+            <TabsContent value="playlists" className="space-y-2">
+              {playlistItems?.length === 0 ? (
+                <p className="text-center text-muted-foreground py-12">Votre playlist est vide</p>
+              ) : (
+                playlistItems?.map((item) => (
+                  <Card key={item.id} className="bg-card">
+                    <CardContent className="p-3 flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                        {item.surahNumber}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">{item.surah?.englishName || "Surah"}</h3>
+                        <p className="text-xs text-muted-foreground truncate">{item.reciter?.name || "Récitateur inconnu"}</p>
+                      </div>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="text-primary"
+                        onClick={() => handlePlayPlaylistItem(item)}
+                      >
+                        <Play className="w-5 h-5 fill-current" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </TabsContent>
           </Tabs>
         )}
