@@ -2,6 +2,7 @@ import { useReciters } from "@/hooks/use-reciters";
 import { usePlayerStore } from "@/hooks/use-player";
 import { useSurahs } from "@/hooks/use-quran";
 import { useBookmarks, useCreateBookmark, useDeleteBookmark } from "@/hooks/use-bookmarks";
+import { useDownloads } from "@/hooks/use-downloads";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon } from "lucide-react";
@@ -15,6 +16,7 @@ export default function Reciters() {
   const { data: reciters, isLoading: isLoadingReciters } = useReciters();
   const { data: surahs, isLoading: isLoadingSurahs } = useSurahs();
   const { data: bookmarks } = useBookmarks();
+  const { data: downloads } = useDownloads();
   const createBookmark = useCreateBookmark();
   const deleteBookmark = useDeleteBookmark();
   const { setReciter, play, currentReciter } = usePlayerStore();
@@ -71,6 +73,7 @@ export default function Reciters() {
           ayahNumber: 0,
           type: "surah",
           isFavorite: true,
+          reciterId: String(selectedReciter.id),
         });
       }
     } else if (type === "Playlist") {
@@ -101,6 +104,10 @@ export default function Reciters() {
 
   const isReciterFavorite = (reciterId: number) => {
     return bookmarks?.some(b => b.type === "reciter" && b.reciterId === String(reciterId) && b.isFavorite);
+  };
+
+  const isSurahDownloaded = (surahNumber: number, reciterId: string) => {
+    return downloads?.some(d => d.surahNumber === surahNumber && d.reciterId === reciterId);
   };
 
   const toggleReciterFavorite = (reciter: any) => {
@@ -179,8 +186,13 @@ export default function Reciters() {
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Playlist", surah)}>
                       <ListPlus className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleAction("Download", surah)}>
-                      <CloudDownload className="w-4 h-4" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn("h-8 w-8 hover:text-green-500", isSurahDownloaded(surah.number, String(selectedReciter.id)) ? "text-green-500" : "text-muted-foreground")}
+                      onClick={() => handleAction("Download", surah)}
+                    >
+                      <CloudDownload className={cn("w-4 h-4", isSurahDownloaded(surah.number, String(selectedReciter.id)) && "fill-current")} />
                     </Button>
                   </div>
                 </CardContent>

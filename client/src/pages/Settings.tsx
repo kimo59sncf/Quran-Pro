@@ -3,15 +3,20 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Moon, Sun, Monitor, Type } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
-  const handleThemeChange = () => {
+  const isDarkMode = theme === "dark";
+
+  const handleThemeChange = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light");
     toast({
       title: "Theme Updated",
-      description: "Theme preferences saved locally.",
+      description: `Switched to ${checked ? "dark" : "light"} mode.`,
     });
   };
 
@@ -35,7 +40,7 @@ export default function Settings() {
                 <Label>Dark Mode</Label>
                 <p className="text-xs text-muted-foreground">Easier on the eyes for night reading</p>
               </div>
-              <Switch defaultChecked onCheckedChange={handleThemeChange} />
+              <Switch checked={isDarkMode} onCheckedChange={handleThemeChange} />
             </div>
           </CardContent>
         </Card>

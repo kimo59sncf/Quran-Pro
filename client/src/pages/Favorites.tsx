@@ -19,9 +19,11 @@ export default function Favorites() {
     bookmarks?.some(b => b.type === "reciter" && b.reciterId === String(r.id) && b.isFavorite)
   );
 
-  const favoriteSurahs = surahs?.filter(s => 
-    bookmarks?.some(b => b.type === "surah" && b.surahNumber === s.number && b.isFavorite)
-  );
+  const favoriteSurahs = bookmarks?.filter(b => b.type === "surah" && b.isFavorite)?.map(bookmark => {
+    const surah = surahs?.find(s => s.number === bookmark.surahNumber);
+    const reciter = reciters?.find(r => String(r.id) === bookmark.reciterId);
+    return { ...bookmark, surah, reciter };
+  });
 
   const playlistItems = bookmarks?.filter(b => b.type === "playlist")?.map(item => {
     const surah = surahs?.find(s => s.number === item.surahNumber);
@@ -31,10 +33,15 @@ export default function Favorites() {
 
   const isLoading = isLoadingBookmarks;
 
-  const handlePlaySurah = (surahNumber: number) => {
-    const reciterToUse = favoriteReciters?.[0] || reciters?.[0];
-    if (reciterToUse && reciterToUse.moshaf.length > 0) {
-      play(surahNumber, reciterToUse, reciterToUse.moshaf[0].server);
+  const handlePlaySurah = (bookmark: any) => {
+    if (bookmark.reciter && bookmark.reciter.moshaf.length > 0) {
+      play(bookmark.surahNumber, bookmark.reciter, bookmark.reciter.moshaf[0].server);
+    } else {
+      // Fallback to first available reciter
+      const reciterToUse = favoriteReciters?.[0] || reciters?.[0];
+      if (reciterToUse && reciterToUse.moshaf.length > 0) {
+        play(bookmark.surahNumber, reciterToUse, reciterToUse.moshaf[0].server);
+      }
     }
   };
 
@@ -106,21 +113,21 @@ export default function Favorites() {
               {favoriteSurahs?.length === 0 ? (
                 <p className="text-center text-muted-foreground py-12">Aucune sourate favorite</p>
               ) : (
-                favoriteSurahs?.map((surah) => (
-                  <Card key={surah.number} className="bg-card">
+                favoriteSurahs?.map((bookmark) => (
+                  <Card key={bookmark.id} className="bg-card">
                     <CardContent className="p-3 flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                        {surah.number}
+                        {bookmark.surahNumber}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{surah.englishName}</h3>
-                        <p className="text-xs text-muted-foreground">{surah.name}</p>
+                        <h3 className="font-semibold text-sm truncate">{bookmark.surah?.englishName || "Surah"}</h3>
+                        <p className="text-xs text-muted-foreground">{bookmark.surah?.name || ""}</p>
                       </div>
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
+                      <Button
+                        size="icon"
+                        variant="ghost"
                         className="text-primary"
-                        onClick={() => handlePlaySurah(surah.number)}
+                        onClick={() => handlePlaySurah(bookmark)}
                       >
                         <Play className="w-5 h-5 fill-current" />
                       </Button>
