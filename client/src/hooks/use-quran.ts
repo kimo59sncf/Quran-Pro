@@ -20,6 +20,7 @@ export interface Ayah {
   ruku: number;
   hizbQuarter: number;
   sajda: boolean;
+  translation?: string;
 }
 
 export interface SurahDetail {
@@ -45,6 +46,7 @@ export interface RandomAyahResponse {
   status: string;
   data: {
     number: number;
+    numberInSurah: number;
     text: string;
     surah: {
       number: number;

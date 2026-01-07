@@ -85,7 +85,7 @@ export default function Favorites() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {favoriteReciters?.map((reciter) => (
-                    <Card key={reciter.id} className="bg-card">
+                    <Card key={reciter.id} className="bg-card cursor-pointer hover:bg-accent transition-colors" onClick={() => setLocation(`/reciters?id=${reciter.id}`)}>
                       <CardContent className="p-4 flex items-center justify-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Music className="w-5 h-5" />
@@ -94,14 +94,9 @@ export default function Favorites() {
                           <h3 className="font-semibold truncate">{reciter.name}</h3>
                           <p className="text-xs text-muted-foreground">{reciter.moshaf.length} Rewaya(s)</p>
                         </div>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="text-primary"
-                          onClick={() => setLocation(`/reciters?id=${reciter.id}`)}
-                        >
+                        <div className="text-primary">
                           <ExternalLink className="w-5 h-5" />
-                        </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -114,7 +109,7 @@ export default function Favorites() {
                 <p className="text-center text-muted-foreground py-12">Aucune sourate favorite</p>
               ) : (
                 favoriteSurahs?.map((bookmark) => (
-                  <Card key={bookmark.id} className="bg-card">
+                  <Card key={bookmark.id} className="bg-card cursor-pointer hover:bg-accent transition-colors" onClick={() => handlePlaySurah(bookmark)}>
                     <CardContent className="p-3 flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                         {bookmark.surahNumber}
@@ -123,14 +118,9 @@ export default function Favorites() {
                         <h3 className="font-semibold text-sm truncate">{bookmark.surah?.englishName || "Surah"}</h3>
                         <p className="text-xs text-muted-foreground">{bookmark.surah?.name || ""}</p>
                       </div>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="text-primary"
-                        onClick={() => handlePlaySurah(bookmark)}
-                      >
+                      <div className="text-primary">
                         <Play className="w-5 h-5 fill-current" />
-                      </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))
@@ -142,7 +132,7 @@ export default function Favorites() {
                 <p className="text-center text-muted-foreground py-12">Votre playlist est vide</p>
               ) : (
                 playlistItems?.map((item) => (
-                  <Card key={item.id} className="bg-card">
+                  <Card key={item.id} className="bg-card cursor-pointer hover:bg-accent transition-colors" onClick={() => handlePlayPlaylistItem(item)}>
                     <CardContent className="p-3 flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                         {item.surahNumber}
@@ -151,14 +141,9 @@ export default function Favorites() {
                         <h3 className="font-semibold text-sm truncate">{item.surah?.englishName || "Surah"}</h3>
                         <p className="text-xs text-muted-foreground truncate">{item.reciter?.name || "Récitateur inconnu"}</p>
                       </div>
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className="text-primary"
-                        onClick={() => handlePlayPlaylistItem(item)}
-                      >
+                      <div className="text-primary">
                         <Play className="w-5 h-5 fill-current" />
-                      </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))

@@ -12,6 +12,28 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useSearch } from "wouter";
 
+// Component to handle reciter image with fallback
+function ReciterImage({ src, alt }: { src: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+        <Music className="w-5 h-5 text-white" />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="w-full h-full object-cover"
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 export default function Reciters() {
   const { data: reciters, isLoading: isLoadingReciters } = useReciters();
   const { data: surahs, isLoading: isLoadingSurahs } = useSurahs();
@@ -236,8 +258,14 @@ export default function Reciters() {
                 onClick={() => handleReciterSelect(reciter)}
               >
                 <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0">
-                    <Music className="w-5 h-5 text-white" />
+                  <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-border">
+                    {reciter.image ? (
+                      <ReciterImage src={reciter.image} alt={reciter.name} />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <Music className="w-5 h-5 text-white" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold truncate">{reciter.name}</h3>

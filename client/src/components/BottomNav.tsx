@@ -6,7 +6,7 @@ export function BottomNav() {
   const [location] = useLocation();
 
   const navItems = [
-    { href: "/", icon: BookOpen, label: "Read", color: "text-blue-500", activeColor: "text-blue-600", fillColor: "fill-blue-500/20" },
+    { href: "/reader", icon: BookOpen, label: "Read", color: "text-blue-500", activeColor: "text-blue-600", fillColor: "fill-blue-500/20" },
     { href: "/reciters", icon: Headphones, label: "Listen", color: "text-purple-500", activeColor: "text-purple-600", fillColor: "fill-purple-500/20" },
     { href: "/favorites", icon: Heart, label: "Cœur", color: "text-red-500", activeColor: "text-red-600", fillColor: "fill-red-500/20" },
     { href: "/memorize", icon: Trophy, label: "Memorize", color: "text-amber-500", activeColor: "text-amber-600", fillColor: "fill-amber-500/20" },

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import ReactHowler from "react-howler";
-import { Play, Pause, SkipBack, SkipForward, Repeat, Shuffle } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePlayerStore } from "@/hooks/use-player";
 import { useSurahs } from "@/hooks/use-quran";
 import { cn } from "@/lib/utils";
@@ -13,7 +13,7 @@ export function AudioPlayer() {
   const { data: surahs } = useSurahs();
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const playerRef = useRef<ReactHowler>(null);
 
   // Pad surah ID with leading zeros (001, 002, etc.) for URL
@@ -48,6 +48,18 @@ export function AudioPlayer() {
     if (currentSurah && currentSurah > 1) {
       play(currentSurah - 1, currentReciter, serverUrl!);
     }
+  };
+
+  const handleSeekBack = () => {
+    const newSeek = Math.max(0, seek - 15);
+    setSeek(newSeek);
+    playerRef.current?.seek(newSeek);
+  };
+
+  const handleSeekForward = () => {
+    const newSeek = Math.min(duration, seek + 15);
+    setSeek(newSeek);
+    playerRef.current?.seek(newSeek);
   };
 
   if (!currentSurah || !audioUrl) return null;
@@ -145,22 +157,30 @@ export function AudioPlayer() {
                 <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
                   <Shuffle className="w-5 h-5" />
                 </Button>
-                
-                <div className="flex items-center gap-4">
-                  <Button size="icon" variant="ghost" onClick={handlePrev} className="h-12 w-12 hover:bg-primary/10 rounded-full">
+
+                <div className="flex items-center gap-2">
+                  <Button size="icon" variant="ghost" onClick={handleSeekBack} className="h-10 w-10 hover:bg-primary/10 rounded-full" title="15s back">
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+
+                  <Button size="icon" variant="ghost" onClick={handlePrev} className="h-12 w-12 hover:bg-primary/10 rounded-full" title="Previous Surah">
                     <SkipBack className="w-6 h-6" />
                   </Button>
-                  
-                  <Button 
-                    size="icon" 
+
+                  <Button
+                    size="icon"
                     className="h-16 w-16 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 hover:bg-primary/90 transition-all"
                     onClick={() => isPlaying ? pause() : resume()}
                   >
                     {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
                   </Button>
-                  
-                  <Button size="icon" variant="ghost" onClick={handleNext} className="h-12 w-12 hover:bg-primary/10 rounded-full">
+
+                  <Button size="icon" variant="ghost" onClick={handleNext} className="h-12 w-12 hover:bg-primary/10 rounded-full" title="Next Surah">
                     <SkipForward className="w-6 h-6" />
+                  </Button>
+
+                  <Button size="icon" variant="ghost" onClick={handleSeekForward} className="h-10 w-10 hover:bg-primary/10 rounded-full" title="15s forward">
+                    <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
 

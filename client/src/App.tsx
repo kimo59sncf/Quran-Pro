@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { AudioPlayer } from "@/components/AudioPlayer";
 
 import Home from "@/pages/Home";
+import Reader from "@/pages/Reader";
 import SurahDetail from "@/pages/SurahDetail";
 import Reciters from "@/pages/Reciters";
 import Favorites from "@/pages/Favorites";
@@ -19,6 +20,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/reader" component={Reader} />
       <Route path="/surah/:id" component={SurahDetail} />
       <Route path="/reciters" component={Reciters} />
       <Route path="/favorites" component={Favorites} />
