@@ -83,8 +83,26 @@ export default function Reciters() {
   withImages.sort(sortByPopularity);
   withoutImages.sort(sortByPopularity);
 
+  // Séparer les réciteurs avec images en deux catégories: très populaires et populaires
+  const mostPopularWithImages = withImages.filter(r => r.popularity === 1);
+  const popularWithImages = withImages.filter(r => r.popularity === 2);
+  const otherWithImages = withImages.filter(r => r.popularity === 3 || r.popularity === 0);
+
   // Combiner: tous les réciteurs avec photos d'abord, puis ceux sans photos
   const filteredReciters = [...withImages, ...withoutImages];
+
+  // Debug logging
+  console.log('=== Reciters Page Debug ===');
+  console.log('Total reciters:', reciters?.length);
+  console.log('Filtered reciters:', filtered.length);
+  console.log('With images:', withImages.length);
+  console.log('Without images:', withoutImages.length);
+  console.log('Most popular with images:', mostPopularWithImages.length);
+  console.log('Popular with images:', popularWithImages.length);
+  console.log('Other with images:', otherWithImages.length);
+  console.log('Search term:', search);
+  console.log('Most popular reciters:', mostPopularWithImages.map(r => ({ name: r.name, image: r.image })));
+  console.log('============================');
 
   const handleReciterSelect = (reciter: any) => {
     setSelectedReciter(reciter);
@@ -267,41 +285,148 @@ export default function Reciters() {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredReciters?.map((reciter) => (
-              <Card 
-                key={reciter.id} 
-                className={`
-                  cursor-pointer border-border hover:border-primary/50 transition-all hover:bg-card/80
-                  ${currentReciter?.id === reciter.id ? 'border-primary bg-primary/5' : 'bg-card'}
-                `}
-                onClick={() => handleReciterSelect(reciter)}
-              >
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 border-2 border-border">
-                    {reciter.image ? (
-                      <ReciterImage src={reciter.image} alt={reciter.name} />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                        <Music className="w-5 h-5 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold truncate">{reciter.name}</h3>
-                      {reciter.popularity > 0 && (
-                        <Badge variant="secondary" className="text-xs">Populaire</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{reciter.moshaf.length} Rewaya(s)</p>
-                  </div>
-                  {currentReciter?.id === reciter.id && (
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-8">
+            {/* Section des réciteurs très populaires avec images */}
+            {mostPopularWithImages.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+                  <span className="text-2xl">⭐</span>
+                  Réciteurs très populaires
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {mostPopularWithImages.map((reciter) => (
+                    <Card
+                      key={reciter.id}
+                      className={`
+                        cursor-pointer border-border hover:border-primary/50 transition-all hover:bg-card/80
+                        ${currentReciter?.id === reciter.id ? 'border-primary bg-primary/5' : 'bg-card'}
+                      `}
+                      onClick={() => handleReciterSelect(reciter)}
+                    >
+                      <CardContent className="p-4 flex flex-col items-center gap-3">
+                        <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 border-2 border-primary shadow-lg">
+                          <ReciterImage src={reciter.image} alt={reciter.name} />
+                        </div>
+                        <div className="text-center w-full">
+                          <h3 className="font-semibold text-sm truncate">{reciter.name}</h3>
+                          <p className="text-xs text-muted-foreground">{reciter.moshaf.length} Rewaya(s)</p>
+                        </div>
+                        {currentReciter?.id === reciter.id && (
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse mt-auto" />
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Section des réciteurs populaires avec images */}
+            {popularWithImages.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+                  <span className="text-xl">🎤</span>
+                  Réciteurs populaires
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {popularWithImages.map((reciter) => (
+                    <Card
+                      key={reciter.id}
+                      className={`
+                        cursor-pointer border-border hover:border-primary/50 transition-all hover:bg-card/80
+                        ${currentReciter?.id === reciter.id ? 'border-primary bg-primary/5' : 'bg-card'}
+                      `}
+                      onClick={() => handleReciterSelect(reciter)}
+                    >
+                      <CardContent className="p-4 flex flex-col items-center gap-3">
+                        <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 border-2 border-border">
+                          <ReciterImage src={reciter.image} alt={reciter.name} />
+                        </div>
+                        <div className="text-center w-full">
+                          <h3 className="font-semibold text-sm truncate">{reciter.name}</h3>
+                          <p className="text-xs text-muted-foreground">{reciter.moshaf.length} Rewaya(s)</p>
+                        </div>
+                        {currentReciter?.id === reciter.id && (
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse mt-auto" />
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Section des autres réciteurs avec images */}
+            {otherWithImages.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+                  <span className="text-xl">📚</span>
+                  Autres réciteurs avec photos
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {otherWithImages.map((reciter) => (
+                    <Card
+                      key={reciter.id}
+                      className={`
+                        cursor-pointer border-border hover:border-primary/50 transition-all hover:bg-card/80
+                        ${currentReciter?.id === reciter.id ? 'border-primary bg-primary/5' : 'bg-card'}
+                      `}
+                      onClick={() => handleReciterSelect(reciter)}
+                    >
+                      <CardContent className="p-4 flex flex-col items-center gap-3">
+                        <div className="w-20 h-20 rounded-full overflow-hidden shrink-0 border-2 border-border">
+                          <ReciterImage src={reciter.image} alt={reciter.name} />
+                        </div>
+                        <div className="text-center w-full">
+                          <h3 className="font-semibold text-sm truncate">{reciter.name}</h3>
+                          <p className="text-xs text-muted-foreground">{reciter.moshaf.length} Rewaya(s)</p>
+                        </div>
+                        {currentReciter?.id === reciter.id && (
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse mt-auto" />
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Section des réciteurs sans images */}
+            {withoutImages.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-primary flex items-center gap-2">
+                  <span className="text-xl">🎵</span>
+                  Autres réciteurs
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {withoutImages.map((reciter) => (
+                    <Card
+                      key={reciter.id}
+                      className={`
+                        cursor-pointer border-border hover:border-primary/50 transition-all hover:bg-card/80
+                        ${currentReciter?.id === reciter.id ? 'border-primary bg-primary/5' : 'bg-card'}
+                      `}
+                      onClick={() => handleReciterSelect(reciter)}
+                    >
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-border">
+                          <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                            <Music className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold truncate">{reciter.name}</h3>
+                          <p className="text-xs text-muted-foreground">{reciter.moshaf.length} Rewaya(s)</p>
+                        </div>
+                        {currentReciter?.id === reciter.id && (
+                          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

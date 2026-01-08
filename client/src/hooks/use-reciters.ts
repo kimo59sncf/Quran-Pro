@@ -56,22 +56,43 @@ function getReciterImagePath(reciter: Reciter): string | undefined {
     if (parts.length > 3) {
       const code = parts[3].replace('/', '');
       const nameMappings: Record<string, string> = {
-        // Main mappings
+        // Most popular reciters (popularity 1)
+        'basit': 'Abdulbasit_Abdusamad.png',
+        'hussary': 'Mahmoud_Khalil_Al_Hussary.png',
+        'husr': 'Mahmoud_Khalil_Al_Hussary.png',
+        'minsh': 'Mohamed_Siddiq_El-Minshawi.png',
+        'ismail': 'Mustafa_Ismail.png',
+        'mustafa': 'Mustafa_Ismail.png',
+        
+        // Popular reciters (popularity 2)
         'sudais': 'Abdul_Rahman_Al_Sudais.png',
         'sds': 'Abdul_Rahman_Al_Sudais.png',
-        's_gmd': 'Saad_El_Ghamidi.png',
+        'shur': 'Saud_Shuraim.png',
+        'juhani': 'Abdullah_Awad_Al_Juhani.png',
+        'jhn': 'Abdullah_Awad_Al_Juhani.png',
+        'maher': 'Maher_Al_Mueaqly.png',
         'alafasy': 'Mishary_Rashid_Alafasy.png',
         'afs': 'Mishary_Rashid_Alafasy.png',
-        'basfar': 'Abdullah_Ibn_Ali_Basfar.png',
-        'bsfr': 'Abdullah_Ibn_Ali_Basfar.png',
-        'maher': 'Maher_Al_Mueaqly.png',
-        'basit': 'Abdulbasit_Abdusamad.png',
+        's_gmd': 'Saad_El_Ghamidi.png',
+        'shatri': 'Abu_Bakr_Al_Shatri.png',
+        'ajm': 'Ahmed_Al_Ajmi.png',
         'rifai': 'Hani_Ar_Rifai.png',
         'hani': 'Hani_Ar_Rifai.png',
-        'minsh': 'Mohamed_Siddiq_El-Minshawi.png',
+        'tunaiji': 'Khalifa_Al_Tunaiji.png',
+        
+        // Less popular reciters (popularity 3)
+        'dosari': 'Yasser_Al-Dosari.png',
+        'yasser': 'Yasser_Al-Dosari.png',
+        'qatami': 'Nasser_Al_Qatami.png',
+        'qtm': 'Nasser_Al_Qatami.png',
+        'luhaidan': 'Muhammad_Al-Luhaidan.png',
+        'lhdan': 'Muhammad_Al-Luhaidan.png',
+        
+        // Other reciters with images
+        'basfar': 'Abdullah_Ibn_Ali_Basfar.png',
+        'bsfr': 'Abdullah_Ibn_Ali_Basfar.png',
         'tabl': 'Mohamed_Tablawi.png',
         'tblawi': 'Mohamed_Tablawi.png',
-        'shatri': 'Abu_Bakr_Al_Shatri.png',
         'ahmed': 'Abdul_Aziz_Al_Ahmed.png',
         'a_ahmed': 'Abdul_Aziz_Al_Ahmed.png',
         'sufi': 'Abdul_Rashid_Ali_Sufi.png',
@@ -81,13 +102,10 @@ function getReciterImagePath(reciter: Reciter): string | undefined {
         'arkani': 'Abdul_Wali_Al_Arkani.png',
         'khayat': 'Abdullah_Al_Khayat.png',
         'kyat': 'Abdullah_Al_Khayat.png',
-        'juhani': 'Abdullah_Awad_Al_Juhani.png',
-        'jhn': 'Abdullah_Awad_Al_Juhani.png',
         'matrood': 'Abdullah_Matrood.png',
         'mtrod': 'Abdullah_Matrood.png',
         'kalbani': 'Adel_Al_Kalbani.png',
         'a_klb': 'Adel_Al_Kalbani.png',
-        'ajm': 'Ahmed_Al_Ajmi.png',
         'saud': 'Ahmed_Saoud.png',
         'zubair': 'AlFateh_Muhammad_Zubair.png',
         'huthaify': 'Ali_Al_huthaify.png',
@@ -108,13 +126,10 @@ function getReciterImagePath(reciter: Reciter): string | undefined {
         'abkr': 'Idriss_Abkar.png',
         'qahtani': 'Khaled_Al_Qahtani.png',
         'jalil': 'Khalid_Al_Jalil.jpg',
-        'tunaiji': 'Khalifa_Al_Tunaiji.png',
         'koshi': 'Laayoun_El_Kouchi.png',
         'francais': 'Le_Saint_Coran_traduit_en_francais.png',
         'banna': 'Mahmoud_Ali_Al_banna.png',
         'bna': 'Mahmoud_Ali_Al_banna.png',
-        'hussary': 'Mahmoud_Khalil_Al_Hussary.png',
-        'husr': 'Mahmoud_Khalil_Al_Hussary.png',
         'barak': 'Mohamed__El_Barak.jpg',
         'braak': 'Mohamed__El_Barak.jpg',
         'mohisni': 'Mohamed_Al_Mohisni.png',
@@ -125,8 +140,6 @@ function getReciterImagePath(reciter: Reciter): string | undefined {
         'marrakchi': 'Mohamed_El_Marrakchi.png',
         'shareef': 'Mohammad_Rachad_Al_Shareef.png',
         'dokali': 'Muhammad_Al-Aalim_Al-Dokali.png',
-        'luhaidan': 'Muhammad_Al-Luhaidan.png',
-        'lhdan': 'Muhammad_Al-Luhaidan.png',
         'ayoub': 'Muhammad_Ayyub.png',
         'ayyoub2': 'Muhammad_Ayyub.png',
         'jibreel': 'Muhammad_Jibreel.png',
@@ -134,12 +147,8 @@ function getReciterImagePath(reciter: Reciter): string | undefined {
         'junaid': 'Muhammad_Taha_Al_Junaid.png',
         'lahouni': 'Mustafa_Al_Lahouni.png',
         'lahoni': 'Mustafa_Al_Lahouni.png',
-        'ismail': 'Mustafa_Ismail.png',
-        'mustafa': 'Mustafa_Ismail.png',
         'gharbi': 'Mustapha_Gharbi.png',
         'nabil': 'Nabil_Ar_Rifai.png',
-        'qatami': 'Nasser_Al_Qatami.png',
-        'qtm': 'Nasser_Al_Qatami.png',
         'kazabri': 'Omar_Al_Kazabri.png',
         'omar_warsh': 'Omar_Al_Kazabri.png',
         'budair': 'Salah_Al_Budair.png',
@@ -149,12 +158,9 @@ function getReciterImagePath(reciter: Reciter): string | undefined {
         'bukhatir': 'Salah_Bukhatir.png',
         'bu_khtr': 'Salah_Bukhatir.png',
         'yusuf': 'Sami_Yusuf.png',
-        'shur': 'Saud_Shuraim.png',
         'sayegh': 'Tawfeeq_As_Sayegh.png',
         'twfeeq': 'Tawfeeq_As_Sayegh.png',
         'jazairi': 'Yassen_Al_Jazairi.png',
-        'dosari': 'Yasser_Al-Dosari.png',
-        'yasser': 'Yasser_Al-Dosari.png',
         'kamel': 'Abdallah_Kamel.jpg',
         'hssain': 'Abdelhamed_Hssain.png',
         'hassani': 'Abdessalam_Al_Hassani.png',
@@ -180,7 +186,7 @@ export function useReciters() {
       const reciters = data.reciters as Reciter[];
 
       // Add images and popularity to reciters
-      return reciters.map(reciter => {
+      const processedReciters = reciters.map(reciter => {
         const server = reciter.moshaf[0]?.server;
         let code = '';
         if (server) {
@@ -189,12 +195,30 @@ export function useReciters() {
             code = parts[3].replace('/', '');
           }
         }
+        const imagePath = getReciterImagePath(reciter);
+        const popularity = getReciterPopularity(code);
+        
+        // Debug logging
+        console.log('Reciter:', reciter.name);
+        console.log('  Server:', server);
+        console.log('  Code:', code);
+        console.log('  Image Path:', imagePath);
+        console.log('  Popularity:', popularity);
+        
         return {
           ...reciter,
-          image: getReciterImagePath(reciter),
-          popularity: getReciterPopularity(code)
+          image: imagePath,
+          popularity: popularity
         };
       });
+      
+      // Log summary
+      const withImages = processedReciters.filter(r => r.image);
+      console.log('Total reciters:', processedReciters.length);
+      console.log('Reciters with images:', withImages.length);
+      console.log('Reciters without images:', processedReciters.length - withImages.length);
+      
+      return processedReciters;
     },
   });
 }
