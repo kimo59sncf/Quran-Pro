@@ -14,18 +14,22 @@ import Reciters from "@/pages/Reciters";
 import Favorites from "@/pages/Favorites";
 import Memorize from "@/pages/Memorize";
 import Settings from "@/pages/Settings";
+import Play from "@/pages/Play";
+import AudioPlayerPage from "@/pages/AudioPlayerPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={Reciters} />
       <Route path="/reader" component={Reader} />
       <Route path="/surah/:id" component={SurahDetail} />
       <Route path="/reciters" component={Reciters} />
       <Route path="/favorites" component={Favorites} />
       <Route path="/memorize" component={Memorize} />
       <Route path="/settings" component={Settings} />
+      <Route path="/play" component={Play} />
+      <Route path="/audio-player" component={AudioPlayerPage} />
       <Route component={NotFound} />
     </Switch>
   );
