@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { usePlayerStore } from "@/hooks/use-player";
 import { useSurahDetail } from "@/hooks/use-quran";
+import { useQuranSync } from "@/hooks/use-quran-sync";
+import { useQuranTimings } from "@/hooks/use-quran-timings";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -21,7 +23,6 @@ export default function PlayPage() {
   
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [currentAyahIndex, setCurrentAyahIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
@@ -35,69 +36,61 @@ export default function PlayPage() {
   // Fetch surah details
   const { data: surahDetail, isLoading: isLoadingSurah } = useSurahDetail(currentSurah || 0);
 
+  // Fetch timing data
+  const { data: timingsData } = useQuranTimings(currentSurah);
+
+  // Use Quran sync hook
+  const { currentAyahId } = useQuranSync({
+    audioRef: playerRef,
+    timings: timingsData,
+    currentSurah,
+    ayahRefs,
+    autoScrollEnabled
+  });
+
+  // Rename for consistency with user's request
+  const currentAyahIndex = currentAyahId;
+
   // Audio URL
   const paddedId = currentSurah ? String(currentSurah).padStart(3, '0') : null;
   const audioUrl = serverUrl && paddedId ? `${serverUrl}/${paddedId}.mp3` : null;
 
-  // Estimate ayah duration (for auto-scroll)
-  const estimateAyahTime = useCallback((index: number, totalAyahs: number): number => {
-    const baseTime = 4; // seconds per ayah average
-    const variation = 1;
-    return (baseTime + Math.random() * variation) * (playbackRate || 1);
-  }, [playbackRate]);
-
-  // Calculate which ayah we're on based on seek position
-  useEffect(() => {
-    if (!surahDetail || duration === 0) return;
-    
-    let accumulatedTime = 0;
-    const ayahTimes = surahDetail.ayahs.map((_, index) => {
-      const time = estimateAyahTime(index, surahDetail.ayahs.length);
-      const startTime = accumulatedTime;
-      accumulatedTime += time;
-      return { startTime, duration: time };
-    });
-
-    const currentIndex = ayahTimes.findIndex(
-      (item, index) => 
-        seek >= item.startTime && 
-        (index === ayahTimes.length - 1 || seek < ayahTimes[index + 1].startTime)
-    );
-
-    if (currentIndex !== -1 && currentIndex !== currentAyahIndex) {
-      setCurrentAyahIndex(currentIndex);
-      scrollToAyah(currentIndex);
+  // Fonction améliorée scrollToAyah
+  // ayahIndex correspond au numéro du verset (1, 2, 3...), donc on fait ayahIndex - 1 pour l'index du tableau
+  const scrollToAyah = useCallback((ayahIndex: number) => {
+    console.log('[Play.tsx] scrollToAyah appelé avec ayahIndex:', ayahIndex, 'autoScrollEnabled:', autoScrollEnabled);
+    if (!autoScrollEnabled || !ayahRefs.current) {
+      console.log('[Play.tsx] scrollToAyah - retour prématuré: autoScrollEnabled=', autoScrollEnabled, 'ayahRefs.current=', !!ayahRefs.current);
+      return;
     }
-  }, [seek, surahDetail, duration, estimateAyahTime]);
 
-  // Scroll to current ayah
-  const scrollToAyah = useCallback((index: number) => {
-    if (!autoScrollEnabled) return;
-    
-    const element = ayahRefs.current[index];
-    if (element && scrollContainerRef.current) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
+    const ayahElement = ayahRefs.current[ayahIndex - 1]; // Conversion numéro verset (1-based) → index tableau (0-based)
+    console.log('[Play.tsx] scrollToAyah - ayahElement trouvé:', !!ayahElement, 'pour index tableau:', ayahIndex - 1);
+    if (ayahElement) {
+      ayahElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest'
       });
+      console.log('[Play.tsx] scrollToAyah - scrollIntoView appelé');
+    } else {
+      console.log('[Play.tsx] scrollToAyah - ERREUR: ayahElement est null pour ayahIndex:', ayahIndex);
     }
   }, [autoScrollEnabled]);
 
-  // Seek to specific ayah
+  // Seek to specific ayah using timing data
   const seekToAyah = useCallback((index: number) => {
-    if (!surahDetail) return;
-    
-    let accumulatedTime = 0;
-    for (let i = 0; i < index; i++) {
-      accumulatedTime += estimateAyahTime(i, surahDetail.ayahs.length);
+    if (!timingsData || !currentSurah || !timingsData[currentSurah]) return;
+
+    const ayahTiming = timingsData[currentSurah][index];
+    if (ayahTiming && playerRef.current) {
+      const seekTime = ayahTiming.tempsDebut / 1000; // Convertir en secondes
+      playerRef.current.currentTime = seekTime;
+      setSeek(seekTime);
     }
-    
-    setSeek(accumulatedTime);
-    if (playerRef.current) {
-      playerRef.current.currentTime = accumulatedTime;
-    }
-    setCurrentAyahIndex(index);
-  }, [surahDetail, estimateAyahTime]);
+  }, [timingsData, currentSurah]);
+
+
 
   // Update seek timer
   useEffect(() => {
@@ -206,7 +199,12 @@ export default function PlayPage() {
       <audio
         ref={playerRef}
         src={audioUrl}
-        onTimeUpdate={(e) => setSeek(e.currentTarget.currentTime)}
+        onTimeUpdate={(e) => {
+          // Mettre à jour seek seulement si pas en cours de lecture (pour éviter les conflits avec le hook)
+          if (!isPlaying) {
+            setSeek(e.currentTarget.currentTime);
+          }
+        }}
         onLoadedMetadata={(e) => {
           setDuration(e.currentTarget.duration);
           // Start playing automatically when audio is loaded
@@ -269,12 +267,13 @@ export default function PlayPage() {
             {surahDetail.ayahs.map((ayah, index) => (
               <div
                 key={ayah.number}
-                ref={(el) => { ayahRefs.current[index] = el }}
+                ref={(el) => {
+                  console.log('[Play.tsx] Ref assignée - index:', index, 'élément:', !!el, 'ayahRefs.current.length:', ayahRefs.current?.length);
+                  ayahRefs.current[index] = el;
+                }}
                 className={cn(
                   "p-6 rounded-2xl transition-all duration-500 cursor-pointer",
-                  index === currentAyahIndex 
-                    ? "bg-primary/10 scale-[1.02] shadow-lg border border-primary/20" 
-                    : "hover:bg-accent/50"
+                  index + 1 === currentAyahIndex ? "active-ayah" : "hover:bg-accent/50"
                 )}
                 onClick={() => seekToAyah(index)}
               >
@@ -283,18 +282,18 @@ export default function PlayPage() {
                   <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
                     {ayah.numberInSurah}
                   </span>
-                  {index === currentAyahIndex && (
+                  {index + 1 === currentAyahIndex && (
                     <span className="text-xs text-primary font-medium animate-pulse">
                       ● En cours
                     </span>
                   )}
                 </div>
-                
+
                 {/* Arabic Text */}
                 <div className="font-arabic text-2xl leading-loose text-right mb-4 text-foreground">
                   {ayah.text}
                 </div>
-                
+
                 {/* Translation */}
                 <p className="text-sm text-muted-foreground leading-relaxed border-t border-border/50 pt-3">
                   {index + 1}. {ayah.translation}
@@ -398,8 +397,8 @@ export default function PlayPage() {
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              onClick={() => seekToAyah(Math.max(0, currentAyahIndex - 1))}
-              disabled={currentAyahIndex === 0}
+              onClick={() => seekToAyah(Math.max(0, (currentAyahIndex || 1) - 2))}
+              disabled={(currentAyahIndex || 1) <= 1}
               className="h-10 w-10 rounded-full"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -407,7 +406,7 @@ export default function PlayPage() {
 
             <Button
               variant="ghost"
-              onClick={() => seekToAyah(Math.max(0, currentAyahIndex - 10))}
+              onClick={() => seekToAyah(Math.max(0, (currentAyahIndex || 1) - 11))}
               className="h-10 w-12 rounded-full"
             >
               <span className="text-xs">-10</span>
@@ -431,7 +430,7 @@ export default function PlayPage() {
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              onClick={() => seekToAyah(Math.min((surahDetail?.ayahs.length || 1) - 1, currentAyahIndex + 10))}
+              onClick={() => seekToAyah(Math.min((surahDetail?.ayahs.length || 1) - 1, (currentAyahIndex || 1) + 9))}
               className="h-10 w-12 rounded-full"
             >
               <ChevronRight className="w-4 h-4" />
@@ -440,8 +439,8 @@ export default function PlayPage() {
 
             <Button
               variant="ghost"
-              onClick={() => seekToAyah(Math.min((surahDetail?.ayahs.length || 1) - 1, currentAyahIndex + 1))}
-              disabled={currentAyahIndex >= (surahDetail?.ayahs.length || 1) - 1}
+              onClick={() => seekToAyah(Math.min((surahDetail?.ayahs.length || 1) - 1, (currentAyahIndex || 1)))}
+              disabled={(currentAyahIndex || 1) >= (surahDetail?.ayahs.length || 1)}
               className="h-10 w-10 rounded-full"
             >
               <ChevronRight className="w-5 h-5" />
@@ -467,3 +466,4 @@ export default function PlayPage() {
     </div>
   );
 }
+          <span>Auto-scroll: {autoScrollEnabled ? "Activé" : "Désactivé"}</span>

@@ -18,6 +18,8 @@ export const downloads = pgTable("downloads", {
   surahNumber: integer("surah_number").notNull(),
   reciterId: text("reciter_id").notNull(),
   localPath: text("local_path").notNull(),
+  status: text("status").default("pending"), // 'pending', 'downloading', 'completed', 'error'
+  progress: integer("progress").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

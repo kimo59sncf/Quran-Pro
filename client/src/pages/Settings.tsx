@@ -3,10 +3,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Monitor, Type, Trash2, HardDrive, AlertCircle } from "lucide-react";
+import { Monitor, Type, Trash2, HardDrive, AlertCircle, CheckCircle2, X, Music } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { useToast } from "@/hooks/use-toast";
-import { useDownloads, useDeleteAllDownloads } from "@/hooks/use-downloads";
+import { useDownloads, useDeleteAllDownloads, useDeleteDownload } from "@/hooks/use-downloads";
+import { useSurahs } from "@/hooks/use-quran";
+import { useReciters } from "@/hooks/use-reciters";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,12 +20,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const { data: downloads } = useDownloads();
+  const { data: surahs } = useSurahs();
+  const { data: reciters } = useReciters();
   const deleteAllDownloads = useDeleteAllDownloads();
+  const deleteOneDownload = useDeleteDownload();
 
   const isDarkMode = theme === "dark";
 
@@ -53,8 +59,39 @@ export default function Settings() {
     });
   };
 
+  const handleDeleteOneDownload = (id: number, surahName: string) => {
+    deleteOneDownload.mutate(id, {
+      onSuccess: () => {
+        toast({
+          title: "Téléchargement Supprimé",
+          description: `${surahName} a été retiré de vos téléchargements.`,
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Erreur",
+          description: "Impossible de supprimer ce téléchargement.",
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
+  const getSurahName = (surahNumber: number) => {
+    return surahs?.find(s => s.number === surahNumber)?.name || `Sourate ${surahNumber}`;
+  };
+
+  const getReciterName = (reciterId: string) => {
+    return reciters?.find(r => String(r.id) === reciterId)?.name || "Inconnu";
+  };
+
+  console.log('=== Settings Page Downloads Debug ===');
+  console.log('All downloads:', downloads);
+  console.log('Downloads length:', downloads?.length);
   const downloadCount = downloads?.length || 0;
   const completedDownloads = downloads?.filter(d => d.status === "completed").length || 0;
+  console.log('Completed downloads count:', completedDownloads);
+  console.log('====================================');
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -135,11 +172,52 @@ export default function Settings() {
                 </div>
               </div>
 
+              {/* Liste des téléchargements */}
+              {downloads && downloads.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm">Téléchargements sauvegardés</Label>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {downloads.map((download) => (
+                      <div 
+                        key={download.id}
+                        className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border border-border"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center",
+                            download.status === "completed" 
+                              ? "bg-green-500/10 text-green-500" 
+                              : "bg-blue-500/10 text-blue-500"
+                          )}>
+                            {download.status === "completed" ? (
+                              <CheckCircle2 className="w-4 h-4 fill-current" />
+                            ) : (
+                              <Music className="w-4 h-4" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{getSurahName(download.surahNumber)}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {getReciterName(download.reciterId)}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive transition-colors"
+                          onClick={() => handleDeleteOneDownload(download.id, getSurahName(download.surahNumber))}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 
-                    variant="destructive" 
-                    className="w-full gap-2"
+                    className="w-full gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 border border-destructive-border"
                     disabled={downloadCount === 0}
                   >
                     <Trash2 className="w-4 h-4" />

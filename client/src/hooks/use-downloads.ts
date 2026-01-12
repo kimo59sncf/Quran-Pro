@@ -17,13 +17,18 @@ export function useCreateDownload() {
 
   return useMutation({
     mutationFn: async (download: InsertDownload) => {
+      console.log('=== useCreateDownload Debug ===');
+      console.log('Creating download:', download);
       const res = await fetch("/api/downloads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(download),
       });
       if (!res.ok) throw new Error("Failed to create download");
-      return res.json();
+      const result = await res.json();
+      console.log('Download created successfully:', result);
+      console.log('==============================');
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["downloads"] });
@@ -62,6 +67,23 @@ export function useDeleteDownload() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["downloads"] });
+    },
+  });
+}
+
+export function useDeleteOneDownload() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/downloads/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete download");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["downloads"] });
+      queryClient.invalidateQueries({ queryKey: ["surahs"] });
     },
   });
 }
