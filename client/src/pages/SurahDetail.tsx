@@ -48,7 +48,7 @@ export default function SurahDetail() {
       {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border">
         <div className="flex items-center justify-between p-4">
-          <Link href="/">
+          <Link href="/reciters">
             <Button variant="ghost" size="icon" className="hover:bg-primary/10">
               <ArrowLeft className="w-5 h-5" />
             </Button>
