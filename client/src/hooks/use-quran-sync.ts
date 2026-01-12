@@ -19,6 +19,7 @@ interface UseQuranSyncProps {
   currentSurah: number | null;
   ayahRefs: RefObject<(HTMLElement | null)[]>;
   autoScrollEnabled?: boolean;
+  offset?: number; // Offset en millisecondes pour ajuster le timing (+ ou -)
 }
 
 interface UseQuranSyncReturn {
@@ -31,7 +32,9 @@ export function useQuranSync({
   timings,
   currentSurah,
   ayahRefs,
-  autoScrollEnabled = true
+  autoScrollEnabled = true,
+  offset = 0
+  
 }: UseQuranSyncProps): UseQuranSyncReturn {
   const [currentAyahId, setCurrentAyahId] = useState<number | null>(null);
 
@@ -77,16 +80,17 @@ export function useQuranSync({
       return;
     }
 
-    const currentTime = audioRef.current.currentTime * 1000; // Convertir en millisecondes
+    console.log('[useQuranSync] handleTimeUpdate - Offset actuel:', offset, 'ms');
+    const currentTime = (audioRef.current.currentTime * 1000) + offset; // Convertir en millisecondes et appliquer l'offset
     const ayahId = findCurrentAyah(currentTime);
 
-    console.log('[useQuranSync] handleTimeUpdate - currentTime:', currentTime, 'ayahId trouvé:', ayahId, 'currentAyahId actuel:', currentAyahId);
+    console.log('[useQuranSync] handleTimeUpdate - currentTime:', currentTime, 'offset:', offset, 'ayahId trouvé:', ayahId, 'currentAyahId actuel:', currentAyahId);
 
     if (ayahId !== currentAyahId) {
       console.log('[useQuranSync] Mise à jour currentAyahId de', currentAyahId, 'à', ayahId);
       setCurrentAyahId(ayahId);
     }
-  }, [audioRef, findCurrentAyah, currentAyahId]);
+  }, [audioRef, findCurrentAyah, currentAyahId, offset]);
 
   // Fonction pour faire défiler vers un verset spécifique
   // ayahId correspond au numéro du verset (1, 2, 3...), donc on fait ayahId - 1 pour l'index du tableau

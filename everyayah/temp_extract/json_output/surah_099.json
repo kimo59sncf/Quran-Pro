@@ -1,0 +1,50 @@
+[
+  {
+    "sourate": 99,
+    "verset": 1,
+    "tempsDebut": 3833,
+    "duree": 5156
+  },
+  {
+    "sourate": 99,
+    "verset": 2,
+    "tempsDebut": 8989,
+    "duree": 4605
+  },
+  {
+    "sourate": 99,
+    "verset": 3,
+    "tempsDebut": 13594,
+    "duree": 5013
+  },
+  {
+    "sourate": 99,
+    "verset": 4,
+    "tempsDebut": 18607,
+    "duree": 5603
+  },
+  {
+    "sourate": 99,
+    "verset": 5,
+    "tempsDebut": 24210,
+    "duree": 4954
+  },
+  {
+    "sourate": 99,
+    "verset": 6,
+    "tempsDebut": 29164,
+    "duree": 9074
+  },
+  {
+    "sourate": 99,
+    "verset": 7,
+    "tempsDebut": 38238,
+    "duree": 7655
+  },
+  {
+    "sourate": 99,
+    "verset": 8,
+    "tempsDebut": 45893,
+    "duree": 8057
+  }
+]

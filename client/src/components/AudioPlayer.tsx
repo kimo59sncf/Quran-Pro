@@ -13,6 +13,7 @@ export function AudioPlayer() {
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isOpen, setIsOpen] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const playerRef = useRef<ReactHowler>(null);
 
   // Pad surah ID with leading zeros (001, 002, etc.) for URL
@@ -20,6 +21,13 @@ export function AudioPlayer() {
   const audioUrl = serverUrl && paddedId ? `${serverUrl}/${paddedId}.mp3` : null;
   
   const currentSurahData = surahs?.find(s => s.number === currentSurah);
+
+  // Reset error when surah or reciter changes
+  useEffect(() => {
+    setLoadError(null);
+    setSeek(0);
+    setDuration(0);
+  }, [currentSurah, serverUrl]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -74,7 +82,14 @@ export function AudioPlayer() {
         playing={isPlaying}
         html5={true}
         ref={playerRef}
-        onLoad={() => setDuration(playerRef.current?.duration() || 0)}
+        onLoad={() => {
+          setDuration(playerRef.current?.duration() || 0);
+          setLoadError(null); // Clear any previous error
+        }}
+        onLoadError={(id, error) => {
+          console.error('Audio load error:', error);
+          setLoadError('Impossible de charger le fichier audio. Ce récitateur pourrait ne pas avoir cette sourate disponible.');
+        }}
         onEnd={() => handleNext()}
       />
 
@@ -133,6 +148,11 @@ export function AudioPlayer() {
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold text-foreground">{currentSurahData?.englishName}</h2>
                 <p className="text-lg text-primary">{currentReciter?.name}</p>
+                {loadError && (
+                  <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <p className="text-sm text-destructive">{loadError}</p>
+                  </div>
+                )}
               </div>
             </div>
 

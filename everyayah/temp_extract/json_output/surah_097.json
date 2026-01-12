@@ -1,0 +1,32 @@
+[
+  {
+    "sourate": 97,
+    "verset": 1,
+    "tempsDebut": 3994,
+    "duree": 8654
+  },
+  {
+    "sourate": 97,
+    "verset": 2,
+    "tempsDebut": 12648,
+    "duree": 5855
+  },
+  {
+    "sourate": 97,
+    "verset": 3,
+    "tempsDebut": 18503,
+    "duree": 5559
+  },
+  {
+    "sourate": 97,
+    "verset": 4,
+    "tempsDebut": 24062,
+    "duree": 11464
+  },
+  {
+    "sourate": 97,
+    "verset": 5,
+    "tempsDebut": 35526,
+    "duree": 4759
+  }
+]

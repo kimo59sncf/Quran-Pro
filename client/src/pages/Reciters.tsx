@@ -116,6 +116,17 @@ export default function Reciters() {
 
   const handleSurahClick = (surah: any) => {
     const server = selectedReciter.moshaf[0].server;
+    // Vérifier si le récitateur est "programmé" (popularité > 0)
+    const isSupportedReciter = selectedReciter.popularity > 0;
+
+    if (!isSupportedReciter) {
+      // Pour les récitateurs non programmés, rediriger vers une page AudioPlayer dédiée
+      play(surah.number, selectedReciter, server);
+      setLocation("/audio-player");
+      return;
+    }
+
+    // Pour les récitateurs programmés, aller à la page Play normale
     play(surah.number, selectedReciter, server);
     setLocation("/play");
   };

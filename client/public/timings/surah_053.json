@@ -1,0 +1,374 @@
+[
+  {
+    "sourate": 53,
+    "verset": 1,
+    "tempsDebut": 4122,
+    "duree": 4456
+  },
+  {
+    "sourate": 53,
+    "verset": 2,
+    "tempsDebut": 8578,
+    "duree": 5112
+  },
+  {
+    "sourate": 53,
+    "verset": 3,
+    "tempsDebut": 13690,
+    "duree": 4849
+  },
+  {
+    "sourate": 53,
+    "verset": 4,
+    "tempsDebut": 18539,
+    "duree": 5860
+  },
+  {
+    "sourate": 53,
+    "verset": 5,
+    "tempsDebut": 24399,
+    "duree": 4557
+  },
+  {
+    "sourate": 53,
+    "verset": 6,
+    "tempsDebut": 28956,
+    "duree": 4404
+  },
+  {
+    "sourate": 53,
+    "verset": 7,
+    "tempsDebut": 33360,
+    "duree": 4008
+  },
+  {
+    "sourate": 53,
+    "verset": 8,
+    "tempsDebut": 37368,
+    "duree": 4617
+  },
+  {
+    "sourate": 53,
+    "verset": 9,
+    "tempsDebut": 41985,
+    "duree": 5407
+  },
+  {
+    "sourate": 53,
+    "verset": 10,
+    "tempsDebut": 47392,
+    "duree": 7959
+  },
+  {
+    "sourate": 53,
+    "verset": 11,
+    "tempsDebut": 55351,
+    "duree": 4506
+  },
+  {
+    "sourate": 53,
+    "verset": 12,
+    "tempsDebut": 59857,
+    "duree": 5509
+  },
+  {
+    "sourate": 53,
+    "verset": 13,
+    "tempsDebut": 65366,
+    "duree": 5156
+  },
+  {
+    "sourate": 53,
+    "verset": 14,
+    "tempsDebut": 70522,
+    "duree": 5708
+  },
+  {
+    "sourate": 53,
+    "verset": 15,
+    "tempsDebut": 76230,
+    "duree": 5808
+  },
+  {
+    "sourate": 53,
+    "verset": 16,
+    "tempsDebut": 82038,
+    "duree": 4959
+  },
+  {
+    "sourate": 53,
+    "verset": 17,
+    "tempsDebut": 86997,
+    "duree": 4704
+  },
+  {
+    "sourate": 53,
+    "verset": 18,
+    "tempsDebut": 91701,
+    "duree": 6810
+  },
+  {
+    "sourate": 53,
+    "verset": 19,
+    "tempsDebut": 98511,
+    "duree": 5307
+  },
+  {
+    "sourate": 53,
+    "verset": 20,
+    "tempsDebut": 103818,
+    "duree": 4858
+  },
+  {
+    "sourate": 53,
+    "verset": 21,
+    "tempsDebut": 108676,
+    "duree": 5807
+  },
+  {
+    "sourate": 53,
+    "verset": 22,
+    "tempsDebut": 114483,
+    "duree": 6159
+  },
+  {
+    "sourate": 53,
+    "verset": 23,
+    "tempsDebut": 120642,
+    "duree": 41554
+  },
+  {
+    "sourate": 53,
+    "verset": 24,
+    "tempsDebut": 162196,
+    "duree": 6062
+  },
+  {
+    "sourate": 53,
+    "verset": 25,
+    "tempsDebut": 168258,
+    "duree": 5655
+  },
+  {
+    "sourate": 53,
+    "verset": 26,
+    "tempsDebut": 173913,
+    "duree": 21430
+  },
+  {
+    "sourate": 53,
+    "verset": 27,
+    "tempsDebut": 195343,
+    "duree": 15319
+  },
+  {
+    "sourate": 53,
+    "verset": 28,
+    "tempsDebut": 210662,
+    "duree": 19127
+  },
+  {
+    "sourate": 53,
+    "verset": 29,
+    "tempsDebut": 229789,
+    "duree": 12566
+  },
+  {
+    "sourate": 53,
+    "verset": 30,
+    "tempsDebut": 242355,
+    "duree": 18729
+  },
+  {
+    "sourate": 53,
+    "verset": 31,
+    "tempsDebut": 261084,
+    "duree": 19425
+  },
+  {
+    "sourate": 53,
+    "verset": 32,
+    "tempsDebut": 280509,
+    "duree": 46271
+  },
+  {
+    "sourate": 53,
+    "verset": 33,
+    "tempsDebut": 326780,
+    "duree": 5450
+  },
+  {
+    "sourate": 53,
+    "verset": 34,
+    "tempsDebut": 332230,
+    "duree": 5858
+  },
+  {
+    "sourate": 53,
+    "verset": 35,
+    "tempsDebut": 338088,
+    "duree": 6611
+  },
+  {
+    "sourate": 53,
+    "verset": 36,
+    "tempsDebut": 344699,
+    "duree": 6206
+  },
+  {
+    "sourate": 53,
+    "verset": 37,
+    "tempsDebut": 350905,
+    "duree": 5056
+  },
+  {
+    "sourate": 53,
+    "verset": 38,
+    "tempsDebut": 355961,
+    "duree": 6620
+  },
+  {
+    "sourate": 53,
+    "verset": 39,
+    "tempsDebut": 362581,
+    "duree": 7254
+  },
+  {
+    "sourate": 53,
+    "verset": 40,
+    "tempsDebut": 369835,
+    "duree": 5255
+  },
+  {
+    "sourate": 53,
+    "verset": 41,
+    "tempsDebut": 375090,
+    "duree": 7159
+  },
+  {
+    "sourate": 53,
+    "verset": 42,
+    "tempsDebut": 382249,
+    "duree": 6458
+  },
+  {
+    "sourate": 53,
+    "verset": 43,
+    "tempsDebut": 388707,
+    "duree": 5859
+  },
+  {
+    "sourate": 53,
+    "verset": 44,
+    "tempsDebut": 394566,
+    "duree": 6208
+  },
+  {
+    "sourate": 53,
+    "verset": 45,
+    "tempsDebut": 400774,
+    "duree": 8512
+  },
+  {
+    "sourate": 53,
+    "verset": 46,
+    "tempsDebut": 409286,
+    "duree": 5305
+  },
+  {
+    "sourate": 53,
+    "verset": 47,
+    "tempsDebut": 414591,
+    "duree": 6961
+  },
+  {
+    "sourate": 53,
+    "verset": 48,
+    "tempsDebut": 421552,
+    "duree": 5859
+  },
+  {
+    "sourate": 53,
+    "verset": 49,
+    "tempsDebut": 427411,
+    "duree": 5607
+  },
+  {
+    "sourate": 53,
+    "verset": 50,
+    "tempsDebut": 433018,
+    "duree": 7009
+  },
+  {
+    "sourate": 53,
+    "verset": 51,
+    "tempsDebut": 440027,
+    "duree": 5558
+  },
+  {
+    "sourate": 53,
+    "verset": 52,
+    "tempsDebut": 445585,
+    "duree": 12017
+  },
+  {
+    "sourate": 53,
+    "verset": 53,
+    "tempsDebut": 457602,
+    "duree": 4256
+  },
+  {
+    "sourate": 53,
+    "verset": 54,
+    "tempsDebut": 461858,
+    "duree": 4506
+  },
+  {
+    "sourate": 53,
+    "verset": 55,
+    "tempsDebut": 466364,
+    "duree": 7269
+  },
+  {
+    "sourate": 53,
+    "verset": 56,
+    "tempsDebut": 473633,
+    "duree": 6770
+  },
+  {
+    "sourate": 53,
+    "verset": 57,
+    "tempsDebut": 480403,
+    "duree": 3892
+  },
+  {
+    "sourate": 53,
+    "verset": 58,
+    "tempsDebut": 484295,
+    "duree": 6412
+  },
+  {
+    "sourate": 53,
+    "verset": 59,
+    "tempsDebut": 490707,
+    "duree": 5756
+  },
+  {
+    "sourate": 53,
+    "verset": 60,
+    "tempsDebut": 496463,
+    "duree": 4838
+  },
+  {
+    "sourate": 53,
+    "verset": 61,
+    "tempsDebut": 501301,
+    "duree": 4357
+  },
+  {
+    "sourate": 53,
+    "verset": 62,
+    "tempsDebut": 505658,
+    "duree": 4556
+  }
+]

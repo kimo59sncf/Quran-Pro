@@ -1,0 +1,32 @@
+[
+  {
+    "sourate": 113,
+    "verset": 1,
+    "tempsDebut": 3933,
+    "duree": 4208
+  },
+  {
+    "sourate": 113,
+    "verset": 2,
+    "tempsDebut": 8141,
+    "duree": 3698
+  },
+  {
+    "sourate": 113,
+    "verset": 3,
+    "tempsDebut": 11839,
+    "duree": 5260
+  },
+  {
+    "sourate": 113,
+    "verset": 4,
+    "tempsDebut": 17099,
+    "duree": 6156
+  },
+  {
+    "sourate": 113,
+    "verset": 5,
+    "tempsDebut": 23255,
+    "duree": 5163
+  }
+]

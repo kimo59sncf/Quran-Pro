@@ -341,7 +341,7 @@ export default function Home() {
       <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-lg border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold font-display text-primary">Quran Pro Free</h1>
+            <h1 className="text-2xl font-bold font-display text-primary">Quran Pro Free Free</h1>
             <p className="text-xs text-muted-foreground">Read, Listen & Reflect</p>
           </div>
           <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
