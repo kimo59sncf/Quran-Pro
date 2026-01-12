@@ -3,13 +3,12 @@ import ReactHowler from "react-howler";
 import { Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePlayerStore } from "@/hooks/use-player";
 import { useSurahs } from "@/hooks/use-quran";
-import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 
 export function AudioPlayer() {
-  const { isPlaying, currentSurah, currentReciter, serverUrl, pause, resume, play } = usePlayerStore();
+  const { isPlaying, currentSurah, currentReciter, serverUrl, pause, resume, play, playbackRate } = usePlayerStore();
   const { data: surahs } = useSurahs();
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -26,7 +25,10 @@ export function AudioPlayer() {
     let timer: NodeJS.Timeout;
     if (isPlaying && playerRef.current) {
       timer = setInterval(() => {
-        setSeek(playerRef.current?.seek() as number);
+        const currentSeek = playerRef.current?.seek();
+        if (typeof currentSeek === 'number') {
+          setSeek(currentSeek);
+        }
       }, 1000);
     }
     return () => clearInterval(timer);
@@ -39,14 +41,14 @@ export function AudioPlayer() {
   };
 
   const handleNext = () => {
-    if (currentSurah && currentSurah < 114) {
-      play(currentSurah + 1, currentReciter, serverUrl!);
+    if (currentSurah && currentSurah < 114 && serverUrl) {
+      play(currentSurah + 1, currentReciter, serverUrl);
     }
   };
 
   const handlePrev = () => {
-    if (currentSurah && currentSurah > 1) {
-      play(currentSurah - 1, currentReciter, serverUrl!);
+    if (currentSurah && currentSurah > 1 && serverUrl) {
+      play(currentSurah - 1, currentReciter, serverUrl);
     }
   };
 
@@ -137,11 +139,11 @@ export function AudioPlayer() {
             {/* Controls */}
             <div className="w-full space-y-6">
               <div className="space-y-2">
-                <Slider 
-                  value={[seek]} 
-                  max={duration} 
+                <Slider
+                  value={[seek]}
+                  max={duration}
                   step={1}
-                  onValueChange={(val) => {
+                  onValueChange={(val: number[]) => {
                     setSeek(val[0]);
                     playerRef.current?.seek(val[0]);
                   }}

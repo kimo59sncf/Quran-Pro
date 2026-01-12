@@ -5,7 +5,8 @@ import { useBookmarks, useCreateBookmark, useDeleteBookmark } from "@/hooks/use-
 import { useDownloads, useCreateDownload, useUpdateDownload } from "@/hooks/use-downloads";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon, CheckCircle2 } from "lucide-react";
+import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon, CheckCircle2, MonitorPlay } from "lucide-react";
+import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -91,7 +92,8 @@ export default function Home() {
   const { data: downloads } = useDownloads();
   const createBookmark = useCreateBookmark();
   const deleteBookmark = useDeleteBookmark();
-  const { setReciter, play, currentReciter } = usePlayerStore();
+  const { setReciter, play, currentReciter, currentSurah } = usePlayerStore();
+  const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [selectedReciter, setSelectedReciter] = useState<any>(null);
   const { toast } = useToast();
@@ -254,14 +256,29 @@ export default function Home() {
         </div>
 
         <div className="p-4 space-y-4">
-          <Button
-            className="w-full gap-2 bg-primary/10 text-primary hover:bg-primary/20 border-primary/20"
-            variant="outline"
-            onClick={handleShufflePlay}
-          >
-            <ShuffleIcon className="w-4 h-4" />
-            Lecteur Aléatoire
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              className="flex-1 gap-2 bg-primary/10 text-primary hover:bg-primary/20 border-primary/20"
+              variant="outline"
+              onClick={() => {
+                if (currentSurah) {
+                  setLocation("/play");
+                } else {
+                  toast({ title: "Lecture", description: "Sélectionnez d'abord une sourate" });
+                }
+              }}
+            >
+              <MonitorPlay className="w-4 h-4" />
+              Mode Visuel
+            </Button>
+            <Button
+              className="flex-1 gap-2"
+              onClick={handleShufflePlay}
+            >
+              <ShuffleIcon className="w-4 h-4" />
+              Aléatoire
+            </Button>
+          </div>
 
           <div className="space-y-2">
             {surahs?.map((surah) => (

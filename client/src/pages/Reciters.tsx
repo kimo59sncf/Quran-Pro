@@ -2,16 +2,16 @@ import { useReciters } from "@/hooks/use-reciters";
 import { usePlayerStore } from "@/hooks/use-player";
 import { useSurahs } from "@/hooks/use-quran";
 import { useBookmarks, useCreateBookmark, useDeleteBookmark } from "@/hooks/use-bookmarks";
-import { useDownloads } from "@/hooks/use-downloads";
+import { useDownloads, useCreateDownload, useUpdateDownload, useDeleteDownload } from "@/hooks/use-downloads";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon } from "lucide-react";
+import { Loader2, Search, Play, Music, ArrowLeft, Heart, ListPlus, CloudDownload, Shuffle as ShuffleIcon, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useSearch } from "wouter";
+import { useLocation, useSearch } from "wouter";
 
 // Component to handle reciter image with fallback
 function ReciterImage({ src, alt }: { src?: string; alt: string }) {
@@ -42,11 +42,15 @@ export default function Reciters() {
   const { data: downloads } = useDownloads();
   const createBookmark = useCreateBookmark();
   const deleteBookmark = useDeleteBookmark();
-  const { setReciter, play, currentReciter } = usePlayerStore();
+  const createDownload = useCreateDownload();
+  const updateDownload = useUpdateDownload();
+  const deleteDownload = useDeleteDownload();
+  const { setReciter, play, currentReciter, resume } = usePlayerStore();
   const [search, setSearch] = useState("");
   const [selectedReciter, setSelectedReciter] = useState<any>(null);
   const { toast } = useToast();
   const queryString = useSearch();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (reciters && queryString) {
@@ -110,6 +114,12 @@ export default function Reciters() {
     setReciter(reciter);
   };
 
+  const handleSurahClick = (surah: any) => {
+    const server = selectedReciter.moshaf[0].server;
+    play(surah.number, selectedReciter, server);
+    setLocation("/play");
+  };
+
   const handleShufflePlay = () => {
     if (!surahs || !selectedReciter) return;
     const randomSurah = surahs[Math.floor(Math.random() * surahs.length)];
@@ -122,6 +132,12 @@ export default function Reciters() {
   };
 
   const handleAction = (type: string, surah: any) => {
+    console.log('=== handleAction Debug ===');
+    console.log('Action type:', type);
+    console.log('Surah:', surah);
+    console.log('Selected Reciter:', selectedReciter);
+    console.log('======================');
+    
     if (type === "Favorites") {
       const isFav = bookmarks?.some(b => b.type === "surah" && b.surahNumber === surah.number && b.isFavorite);
       if (isFav) {
@@ -150,6 +166,78 @@ export default function Reciters() {
           reciterId: String(selectedReciter.id)
         });
       }
+    } else if (type === "Download") {
+      // Vérifier si déjà téléchargé
+      const existingDownload = downloads?.find(d =>
+        d.surahNumber === surah.number && d.reciterId === String(selectedReciter.id)
+      );
+      
+      if (existingDownload) {
+        // Si déjà téléchargé, le supprimer
+        if (existingDownload.id) {
+          deleteDownload.mutate(existingDownload.id, {
+            onSuccess: () => {
+              toast({
+                title: "Téléchargement supprimé",
+                description: `${surah.englishName} a été retiré des téléchargements.`,
+              });
+            },
+            onError: () => {
+              toast({
+                title: "Erreur",
+                description: "Impossible de supprimer le téléchargement.",
+                variant: "destructive",
+              });
+            },
+          });
+        }
+      } else {
+        // Créer un nouveau téléchargement
+        const server = selectedReciter.moshaf[0].server;
+        const paddedId = String(surah.number).padStart(3, '0');
+        const audioUrl = `${server}/${paddedId}.mp3`;
+        
+        createDownload.mutate({
+          surahNumber: surah.number,
+          reciterId: String(selectedReciter.id),
+          localPath: audioUrl,
+          status: "pending",
+          progress: 0,
+        }, {
+          onSuccess: (data) => {
+            console.log('Download created successfully:', data);
+            // Simuler le téléchargement en mettant à jour le statut
+            setTimeout(() => {
+              updateDownload.mutate({
+                id: data.id,
+                data: { status: "downloading", progress: 50 }
+              });
+              
+              // Simuler la fin du téléchargement
+              setTimeout(() => {
+                updateDownload.mutate({
+                  id: data.id,
+                  data: { status: "completed", progress: 100 }
+                }, {
+                  onSuccess: () => {
+                    toast({
+                      title: "Téléchargement terminé",
+                      description: `${surah.englishName} a été téléchargé avec succès.`,
+                    });
+                  }
+                });
+              }, 1500);
+            }, 500);
+          },
+          onError: () => {
+            toast({
+              title: "Erreur",
+              description: "Impossible de créer le téléchargement.",
+              variant: "destructive",
+            });
+          },
+        });
+      }
     } else {
       toast({
         title: type,
@@ -167,7 +255,15 @@ export default function Reciters() {
   };
 
   const isSurahDownloaded = (surahNumber: number, reciterId: string) => {
-    return downloads?.some(d => d.surahNumber === surahNumber && d.reciterId === reciterId);
+    const download = downloads?.find(d => d.surahNumber === surahNumber && d.reciterId === reciterId);
+    console.log('=== isSurahDownloaded Debug ===');
+    console.log('surahNumber:', surahNumber);
+    console.log('reciterId:', reciterId);
+    console.log('download found:', download);
+    console.log('download status:', download?.status);
+    console.log('is completed:', download?.status === 'completed');
+    console.log('==============================');
+    return download?.status === 'completed';
   };
 
   const toggleReciterFavorite = (reciter: any) => {
@@ -219,17 +315,20 @@ export default function Reciters() {
 
           <div className="space-y-2">
             {surahs?.map((surah) => (
-              <Card key={surah.number} className="bg-card hover:bg-accent/50 transition-colors">
+              <Card key={surah.number} className="bg-card hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => handleSurahClick(surah)}>
                 <CardContent className="p-3 flex items-center gap-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="text-xs font-mono text-muted-foreground w-6">{surah.number}</span>
-                    <div 
-                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-                      onClick={() => play(surah.number, selectedReciter, server)}
+                    <div
+                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm hover:bg-primary hover:text-white transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSurahClick(surah);
+                      }}
                     >
                       <Play className="w-4 h-4 fill-current" />
                     </div>
-                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => play(surah.number, selectedReciter, server)}>
+                    <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm truncate">{surah.englishName}</h3>
                       <p className="text-xs text-muted-foreground">{surah.name}</p>
                     </div>
@@ -252,7 +351,11 @@ export default function Reciters() {
                       className={cn("h-8 w-8 hover:text-green-500", isSurahDownloaded(surah.number, String(selectedReciter.id)) ? "text-green-500" : "text-muted-foreground")}
                       onClick={() => handleAction("Download", surah)}
                     >
-                      <CloudDownload className={cn("w-4 h-4", isSurahDownloaded(surah.number, String(selectedReciter.id)) && "fill-current")} />
+                      {isSurahDownloaded(surah.number, String(selectedReciter.id)) ? (
+                        <CheckCircle2 className="w-4 h-4 fill-current" />
+                      ) : (
+                        <CloudDownload className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                 </CardContent>
