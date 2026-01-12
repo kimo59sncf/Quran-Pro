@@ -1,20 +1,27 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useLocation } from "wouter";
 import ReactHowler from "react-howler";
 import { Play, Pause, SkipBack, SkipForward, Repeat, Shuffle, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePlayerStore } from "@/hooks/use-player";
-import { useSurahs } from "@/hooks/use-quran";
+import { useSurahs, useSurahDetail } from "@/hooks/use-quran";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 
 export function AudioPlayer() {
-  const { isPlaying, currentSurah, currentReciter, serverUrl, pause, resume, play } = usePlayerStore();
+  const { isPlaying, currentSurah, currentReciter, serverUrl, pause, resume, play, loopMode, shuffleMode, toggleLoop, toggleShuffle, nextSurah, previousSurah } = usePlayerStore();
   const { data: surahs } = useSurahs();
+  const { data: surahDetail } = useSurahDetail(currentSurah || 0);
+  const [location] = useLocation();
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isOpen, setIsOpen] = useState(true);
+  const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
   const playerRef = useRef<ReactHowler>(null);
+
+  // Don't play audio when on Play page (fullscreen mode)
+  const isOnPlayPage = location === "/play";
 
   // Pad surah ID with leading zeros (001, 002, etc.) for URL
   const paddedId = currentSurah ? String(currentSurah).padStart(3, '0') : null;
@@ -39,15 +46,11 @@ export function AudioPlayer() {
   };
 
   const handleNext = () => {
-    if (currentSurah && currentSurah < 114) {
-      play(currentSurah + 1, currentReciter, serverUrl!);
-    }
+    nextSurah();
   };
 
   const handlePrev = () => {
-    if (currentSurah && currentSurah > 1) {
-      play(currentSurah - 1, currentReciter, serverUrl!);
-    }
+    previousSurah();
   };
 
   const handleSeekBack = () => {
@@ -62,25 +65,51 @@ export function AudioPlayer() {
     playerRef.current?.seek(newSeek);
   };
 
+  // Navigation de verset
+  const seekToVerse = useCallback((verseIndex: number) => {
+    if (!surahDetail || duration === 0) return;
+
+    // Calcul approximatif basé sur la durée moyenne par verset
+    const totalVerses = surahDetail.ayahs.length;
+    const averageVerseDuration = duration / totalVerses;
+    const targetTime = verseIndex * averageVerseDuration;
+
+    setSeek(targetTime);
+    playerRef.current?.seek(targetTime);
+    setCurrentVerseIndex(verseIndex);
+  }, [surahDetail, duration]);
+
+  const handleNextVerse = () => {
+    if (!surahDetail) return;
+    const nextIndex = Math.min(surahDetail.ayahs.length - 1, currentVerseIndex + 1);
+    seekToVerse(nextIndex);
+  };
+
+  const handlePrevVerse = () => {
+    const prevIndex = Math.max(0, currentVerseIndex - 1);
+    seekToVerse(prevIndex);
+  };
+
   if (!currentSurah || !audioUrl) return null;
 
   return (
     <>
-      {/* Hidden Audio Element */}
+      {/* Hidden Audio Element - Only play when not on Play page */}
       <ReactHowler
         src={audioUrl}
-        playing={isPlaying}
+        playing={isPlaying && !isOnPlayPage}
         html5={true}
         ref={playerRef}
         onLoad={() => setDuration(playerRef.current?.duration() || 0)}
         onEnd={() => handleNext()}
       />
 
-      {/* Mini Player (Sticky) */}
-      <div 
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-16 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-primary/20 p-3 cursor-pointer shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"
-      >
+      {/* Mini Player (Sticky) - Hide when on Play page */}
+      {!isOnPlayPage && (
+        <div
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-16 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-primary/20 p-3 cursor-pointer shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"
+        >
         <div className="flex items-center justify-between max-w-7xl mx-auto px-2">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
@@ -106,16 +135,18 @@ export function AudioPlayer() {
         
         {/* Progress Bar (Mini) */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-muted/30">
-          <div 
-            className="h-full bg-primary transition-all duration-300" 
-            style={{ width: `${(seek / duration) * 100}%` }} 
+          <div
+            className="h-full bg-primary transition-all duration-300"
+            style={{ width: `${(seek / duration) * 100}%` }}
           />
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Full Screen Player */}
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="bottom" className="h-[100dvh] pt-12 flex flex-col bg-gradient-to-b from-background to-card border-none">
+          <SheetTitle style={{ position: 'absolute', width: '1px', height: '1px', padding: '0', margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: '0' }}>Lecteur Audio</SheetTitle>
           <div className="flex-1 flex flex-col items-center justify-center gap-8 max-w-md mx-auto w-full">
             
             {/* Album Art / Surah Info */}
@@ -154,7 +185,13 @@ export function AudioPlayer() {
               </div>
 
               <div className="flex items-center justify-between">
-                <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
+                <Button
+                  size="icon"
+                  variant={shuffleMode ? "default" : "ghost"}
+                  onClick={toggleShuffle}
+                  className={shuffleMode ? "text-primary" : "text-muted-foreground hover:text-foreground"}
+                  title={shuffleMode ? "Désactiver aléatoire" : "Activer aléatoire"}
+                >
                   <Shuffle className="w-5 h-5" />
                 </Button>
 
@@ -163,7 +200,11 @@ export function AudioPlayer() {
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
 
-                  <Button size="icon" variant="ghost" onClick={handlePrev} className="h-12 w-12 hover:bg-primary/10 rounded-full" title="Previous Surah">
+                  <Button size="icon" variant="ghost" onClick={handlePrevVerse} className="h-8 w-8 hover:bg-primary/10 rounded-full text-xs" title="Verset précédent">
+                    ◀
+                  </Button>
+
+                  <Button size="icon" variant="ghost" onClick={handlePrev} className="h-12 w-12 hover:bg-primary/10 rounded-full" title="Sourate précédente">
                     <SkipBack className="w-6 h-6" />
                   </Button>
 
@@ -175,8 +216,12 @@ export function AudioPlayer() {
                     {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
                   </Button>
 
-                  <Button size="icon" variant="ghost" onClick={handleNext} className="h-12 w-12 hover:bg-primary/10 rounded-full" title="Next Surah">
+                  <Button size="icon" variant="ghost" onClick={handleNext} className="h-12 w-12 hover:bg-primary/10 rounded-full" title="Sourate suivante">
                     <SkipForward className="w-6 h-6" />
+                  </Button>
+
+                  <Button size="icon" variant="ghost" onClick={handleNextVerse} className="h-8 w-8 hover:bg-primary/10 rounded-full text-xs" title="Verset suivant">
+                    ▶
                   </Button>
 
                   <Button size="icon" variant="ghost" onClick={handleSeekForward} className="h-10 w-10 hover:bg-primary/10 rounded-full" title="15s forward">
@@ -184,7 +229,13 @@ export function AudioPlayer() {
                   </Button>
                 </div>
 
-                <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
+                <Button
+                  size="icon"
+                  variant={loopMode ? "default" : "ghost"}
+                  onClick={toggleLoop}
+                  className={loopMode ? "text-primary" : "text-muted-foreground hover:text-foreground"}
+                  title={loopMode ? "Désactiver boucle" : "Activer boucle"}
+                >
                   <Repeat className="w-5 h-5" />
                 </Button>
               </div>
